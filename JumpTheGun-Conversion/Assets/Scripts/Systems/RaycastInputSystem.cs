@@ -3,9 +3,11 @@ using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Physics;
 using Unity.Physics.Systems;
+using Unity.Transforms;
 using UnityEngine;
 using RaycastHit = Unity.Physics.RaycastHit;
 
+[UpdateAfter(typeof(SpawnTerrainSystem))]
 public partial class RaycastInputSystem : SystemBase
 {
 
@@ -23,6 +25,10 @@ public partial class RaycastInputSystem : SystemBase
 
     protected override void OnUpdate()
     {
+        // Debugging things...
+        if(Input.GetKey(KeyCode.A))
+            Debug.Break();
+        
         var ecb = ecbSystem.CreateCommandBuffer().AsParallelWriter();
         RaycastInput raycastInput = new RaycastInput();
         RaycastHit raycastHit;
@@ -50,8 +56,21 @@ public partial class RaycastInputSystem : SystemBase
         if (_collisionWorld.CastRay(raycastInput, out raycastHit))
         {
             float3 hitPos = raycastHit.Position;
+            var gameData = GetSingleton<GameData>();
+            var nonuniforms = GetComponentDataFromEntity<NonUniformScale>();
             
             // Schedule player direction job
+            var playerDirJob = new PlayerDirectionJob
+            {
+                hitPos = hitPos,
+                col = gameData.col,
+                row = gameData.row,
+                nonuniforms = nonuniforms,
+                frames = UnityEngine.Time.frameCount
+            };
+
+            var handle = playerDirJob.Schedule();
+            ecbSystem.AddJobHandleForProducer(handle);
         }
     }
 }
@@ -60,19 +79,27 @@ public partial class RaycastInputSystem : SystemBase
 public partial struct PlayerDirectionJob : IJobEntity
 {
     public float3 hitPos;
+    public int col;
+    public int row;
+    public ComponentDataFromEntity<NonUniformScale> nonuniforms;
+    public int frames;
 
-    //public void Execute(in Player player, DynamicBuffer<BoxComponent> buffer)
-    //{
+    public void Execute(in GameData gd) //in Player player, DynamicBuffer<BoxComponent> buffer)
+    {
         // Find closest box coords in hitPos direction
-        
-        // Use box coords as index into buffer
-    //    BoxComponent box = buffer[hitPos.x + hitPos.y * height];
-    //    Entity boxEntity = box.entity;
-        
-        // Use calculations from original code for height value of parabola and the parabola parameters
-    //    NonUniformScale boxScale = nonuniforms[boxEntity];
+        int gridX = (int)math.round(hitPos.x);
+        int gridY = (int)math.round(hitPos.z);
+        int boxIndex = col * gridX + gridY;
 
-    //    boxTranslation.y; // use for height calculations of parabola, see original code in Player
+        // return;
+        // Use box coords as index into buffer
+        BoxesComponent box = gd.boxes[boxIndex];
+        Entity boxEntity = box.entity;
+
+        // Use calculations from original code for height value of parabola and the parabola parameters
+        NonUniformScale boxScale = nonuniforms[boxEntity];
+
+        //    boxTranslation.y; // use for height calculations of parabola, see original code in Player
 
 
         // Set parabola params...
@@ -80,5 +107,15 @@ public partial struct PlayerDirectionJob : IJobEntity
 
 
 
-    //}
+        if (frames % 60 == 0)
+        {
+            // Debug.Log($"Hitpos: [{hitPos.x}, {hitPos.y}, {hitPos.z}]");
+            // Debug.Log($"GridX: {gridX}");
+            // Debug.Log($"GridY: {gridY}");
+            Debug.Log($"BoxIndex: {boxIndex}");
+            Debug.Log($"Box entity: {boxEntity}");
+            Debug.Log($"Non-Uniform Scale: {boxScale.Value}");
+        }
+
+    }
 }

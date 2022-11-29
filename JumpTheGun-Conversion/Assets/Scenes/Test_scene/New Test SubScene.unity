@@ -168,10 +168,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 436d8c5c4e4348e4d995e7ceec5be1f9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  manager: {fileID: 22744345}
   minHeight: 2.5
   maxHeight: 5
-  length: 10
-  width: 10
+  row: 10
+  col: 10
 --- !u!114 &22744348
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -333,7 +334,7 @@ MonoBehaviour:
       m_Override: 0
       m_Value:
         Category00: 0
-        Category01: 0
+        Category01: 1
         Category02: 0
         Category03: 0
         Category04: 0

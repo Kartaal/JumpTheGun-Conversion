@@ -50,16 +50,18 @@ public partial struct SpawnBoxJob : IJobEntity
     private Unity.Mathematics.Random random;
     public float randomSeed;
 
-    private void Execute(in BoxPrefabComp prefab, in GameData gameData)
+    private void Execute(in BoxPrefabComp prefab, ref GameData gameData)
     {
         random = new Unity.Mathematics.Random((uint)randomSeed);
 
-        float width = gameData.width;
-        float length = gameData.length;
+        float col = gameData.col;
+        float row = gameData.row;
+
+        gameData.boxes = ecb.AddBuffer<BoxesComponent>(gameData.manager);
         
-        for (int i = 0; i < width; i++)
+        for (int i = 0; i < col; i++)
         {
-            for (int j = 0; j < length; j++)
+            for (int j = 0; j < row; j++)
             {
                 Entity entity = ecb.Instantiate(prefab.Value);
 
@@ -68,6 +70,11 @@ public partial struct SpawnBoxJob : IJobEntity
                 //     length = i,
                 //     width = j,
                 // });
+
+                gameData.boxes.Add(new BoxesComponent
+                {
+                    entity = entity
+                });
 
                 // height scaling
                 height = random.NextFloat(gameData.minHeight, gameData.maxHeight);
