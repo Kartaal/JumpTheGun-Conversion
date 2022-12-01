@@ -58,13 +58,13 @@ public partial class RaycastInputSystem : SystemBase
             float3 hitPos = raycastHit.Position;
             var gameData = GetSingleton<GameData>();
             var nonuniforms = GetComponentDataFromEntity<NonUniformScale>();
-            
+
             // Schedule player direction job
             var playerDirJob = new PlayerDirectionJob
             {
                 hitPos = hitPos,
-                col = gameData.col,
-                row = gameData.row,
+                col = gameData.width,
+                row = gameData.height,
                 nonuniforms = nonuniforms,
                 frames = UnityEngine.Time.frameCount
             };
@@ -82,18 +82,21 @@ public partial struct PlayerDirectionJob : IJobEntity
     public int col;
     public int row;
     public ComponentDataFromEntity<NonUniformScale> nonuniforms;
+    // public DynamicBuffer<BoxesComponent> boxes;
     public int frames;
 
-    public void Execute(in GameData gd) //in Player player, DynamicBuffer<BoxComponent> buffer)
-    {
+    public void Execute(ref GameData gd, ref DynamicBuffer<BoxesComponent> boxes)
+    {   
         // Find closest box coords in hitPos direction
         int gridX = (int)math.round(hitPos.x);
         int gridY = (int)math.round(hitPos.z);
         int boxIndex = col * gridX + gridY;
 
+        if (boxIndex >= boxes.Length) return; // Just testing, ensuring that we don't attempt a non-working index
+        
         // return;
         // Use box coords as index into buffer
-        BoxesComponent box = gd.boxes[boxIndex];
+        BoxesComponent box = boxes[boxIndex];
         Entity boxEntity = box.entity;
 
         // Use calculations from original code for height value of parabola and the parabola parameters
@@ -113,7 +116,7 @@ public partial struct PlayerDirectionJob : IJobEntity
             // Debug.Log($"GridX: {gridX}");
             // Debug.Log($"GridY: {gridY}");
             Debug.Log($"BoxIndex: {boxIndex}");
-            Debug.Log($"Box entity: {boxEntity}");
+            Debug.Log($"Box entity index: {boxEntity.Index}");
             Debug.Log($"Non-Uniform Scale: {boxScale.Value}");
         }
 

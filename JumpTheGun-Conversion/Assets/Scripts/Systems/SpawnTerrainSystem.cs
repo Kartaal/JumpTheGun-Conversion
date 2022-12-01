@@ -7,13 +7,13 @@ using Random = UnityEngine.Random;
 
 public partial class SpawnTerrainSystem : SystemBase
 {
-    public BeginSimulationEntityCommandBufferSystem ecbSystem;
+    public EndInitializationEntityCommandBufferSystem ecbSystem;
     private bool hasRun = false;
 
 
     protected override void OnCreate()
     {
-        ecbSystem = World.GetOrCreateSystem<BeginSimulationEntityCommandBufferSystem>();
+        ecbSystem = World.GetOrCreateSystem<EndInitializationEntityCommandBufferSystem>();
     }
 
     protected override void OnUpdate()
@@ -54,8 +54,8 @@ public partial struct SpawnBoxJob : IJobEntity
     {
         random = new Unity.Mathematics.Random((uint)randomSeed);
 
-        float col = gameData.col;
-        float row = gameData.row;
+        float col = gameData.width;
+        float row = gameData.height;
 
         gameData.boxes = ecb.AddBuffer<BoxesComponent>(gameData.manager);
         
@@ -65,12 +65,7 @@ public partial struct SpawnBoxJob : IJobEntity
             {
                 Entity entity = ecb.Instantiate(prefab.Value);
 
-                // ecb.SetComponent(entity, new BoxComponent
-                // {
-                //     length = i,
-                //     width = j,
-                // });
-
+                // Adding to the DynamicBuffer
                 gameData.boxes.Add(new BoxesComponent
                 {
                     entity = entity
@@ -91,4 +86,5 @@ public partial struct SpawnBoxJob : IJobEntity
             }
         }
     }
+
 }

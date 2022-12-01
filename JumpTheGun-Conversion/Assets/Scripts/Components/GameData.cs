@@ -10,8 +10,8 @@ public struct GameData : IComponentData
     public float minHeight;
     public float maxHeight;
 
-    public int row;
-    public int col;
+    public int height;
+    public int width;
 
     public DynamicBuffer<BoxesComponent> boxes;
 }
