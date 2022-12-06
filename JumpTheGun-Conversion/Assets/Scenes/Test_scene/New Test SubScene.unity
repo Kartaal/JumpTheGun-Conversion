@@ -171,8 +171,8 @@ MonoBehaviour:
   manager: {fileID: 22744345}
   minHeight: 2.5
   maxHeight: 5
-  row: 10
-  col: 10
+  height: 10
+  width: 10
 --- !u!114 &22744348
 MonoBehaviour:
   m_ObjectHideFlags: 0
