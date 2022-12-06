@@ -1,8 +1,10 @@
 using System;
 using Unity.Burst;
+using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
+using UnityEngine;
 using Random = UnityEngine.Random;
 
 public partial class SpawnTerrainSystem : SystemBase
@@ -50,9 +52,12 @@ public partial struct SpawnBoxJob : IJobEntity
     private Unity.Mathematics.Random random;
     public float randomSeed;
 
-    private void Execute(in BoxPrefabComp prefab, ref GameData gameData)
+    private void Execute(in BoxPrefabComp prefab, in PlayerPrefab playerPrefab, in TankPrefab tankPrefab, ref GameData gameData)
     {
         random = new Unity.Mathematics.Random((uint)randomSeed);
+
+        NativeArray<float> heights = new NativeArray<float>(100, Allocator.Temp);
+        NativeArray<int> occupiedIndices = new NativeArray<int>(6, Allocator.Temp);
 
         float col = gameData.width;
         float row = gameData.height;
@@ -63,27 +68,62 @@ public partial struct SpawnBoxJob : IJobEntity
         {
             for (int j = 0; j < row; j++)
             {
-                Entity entity = ecb.Instantiate(prefab.Value);
+                Entity boxEntity = ecb.Instantiate(prefab.Value);
 
                 // Adding to the DynamicBuffer
                 gameData.boxes.Add(new BoxesComponent
                 {
-                    entity = entity
+                    entity = boxEntity,
+                    occupied = false
                 });
 
                 // height scaling
                 height = random.NextFloat(gameData.minHeight, gameData.maxHeight);
-                ecb.AddComponent(entity, new NonUniformScale
+                ecb.AddComponent(boxEntity, new NonUniformScale
                 {
                     Value = new float3(1, height, 1)
                 });
 
-                ecb.SetComponent(entity, new Translation
+                ecb.SetComponent(boxEntity, new Translation
                 {
                     // Height / 2 to ensure bottom of box aligns with y = 0
                     Value = new float3(i, height / 2f, j)
                 });
+
+                heights[(int)(col * i + j)] = height;
             }
+        }
+        
+        
+
+        Entity playerEntity = ecb.Instantiate(playerPrefab.entity);
+
+        int playerX = random.NextInt(0, (int)col);
+        int playerY = random.NextInt(0, (int)row);
+        float playerHeight = heights[(int)col * playerX + playerY] + 0.3f;
+        // gameData.boxes[(int)col * playerX + playerY].occupied = true; // Figure out how to do this
+        occupiedIndices[0] = (int)col * playerX + playerY;
+
+        ecb.SetComponent(playerEntity, new Translation
+        {
+            Value = new float3(playerX, playerHeight, playerY)
+        });
+
+
+        int tankX = -1;
+        int tankY = -1;
+        var tankIndex = -1;
+        // Spawn tanks
+        for (int count = 0; count < 5; count++)
+        {
+            Entity tankEntity = ecb.Instantiate(tankPrefab.entity);
+            
+            tankX = random.NextInt(0, (int)col);
+            tankY = random.NextInt(0, (int)row);
+            tankIndex = (int)col * tankX + tankY;
+
+            
+
         }
     }
 

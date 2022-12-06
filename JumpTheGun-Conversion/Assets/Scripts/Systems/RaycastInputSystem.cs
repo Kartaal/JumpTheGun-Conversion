@@ -21,6 +21,7 @@ public partial class RaycastInputSystem : SystemBase
     {
         ecbSystem = World.GetOrCreateSystem<BeginSimulationEntityCommandBufferSystem>();
         _physicsWorld = World.GetOrCreateSystem<BuildPhysicsWorld>();
+        RequireSingletonForUpdate<Player>();
     }
 
     protected override void OnUpdate()
@@ -65,6 +66,7 @@ public partial class RaycastInputSystem : SystemBase
                 hitPos = hitPos,
                 col = gameData.width,
                 row = gameData.height,
+                boxes = gameData.boxes,
                 nonuniforms = nonuniforms,
                 frames = UnityEngine.Time.frameCount
             };
@@ -82,10 +84,10 @@ public partial struct PlayerDirectionJob : IJobEntity
     public int col;
     public int row;
     public ComponentDataFromEntity<NonUniformScale> nonuniforms;
-    // public DynamicBuffer<BoxesComponent> boxes;
+    public DynamicBuffer<BoxesComponent> boxes;
     public int frames;
 
-    public void Execute(ref GameData gd, ref DynamicBuffer<BoxesComponent> boxes)
+    public void Execute(in Player player) //ref GameData gd, ref DynamicBuffer<BoxesComponent> boxes)
     {   
         // Find closest box coords in hitPos direction
         int gridX = (int)math.round(hitPos.x);
