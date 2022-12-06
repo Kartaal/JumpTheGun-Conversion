@@ -4,7 +4,6 @@ using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
-using UnityEngine;
 using Random = UnityEngine.Random;
 
 public partial class SpawnTerrainSystem : SystemBase
@@ -31,7 +30,8 @@ public partial class SpawnTerrainSystem : SystemBase
         var job = new SpawnBoxJob
         {
             ecb = ecb,
-            randomSeed = randomSeed
+            randomSeed = randomSeed,
+            // player = playerEntity
         };
 
         var handle = job.Schedule();
@@ -44,6 +44,7 @@ public partial class SpawnTerrainSystem : SystemBase
 public partial struct SpawnBoxJob : IJobEntity
 {
     public EntityCommandBuffer ecb;
+    // public Entity player;
 
     private float height; 
     // public int width, length;
@@ -61,8 +62,12 @@ public partial struct SpawnBoxJob : IJobEntity
 
         float col = gameData.width;
         float row = gameData.height;
+        
+        
+        Entity playerEntity = ecb.Instantiate(playerPrefab.entity);
 
-        gameData.boxes = ecb.AddBuffer<BoxesComponent>(gameData.manager);
+        //gameData.boxes =
+        var buffer = ecb.AddBuffer<BoxesComponent>(playerEntity); //gameData.manager);
         
         for (int i = 0; i < col; i++)
         {
@@ -71,7 +76,8 @@ public partial struct SpawnBoxJob : IJobEntity
                 Entity boxEntity = ecb.Instantiate(prefab.Value);
 
                 // Adding to the DynamicBuffer
-                gameData.boxes.Add(new BoxesComponent
+                // gameData.boxes.
+                buffer.Add(new BoxesComponent
                 {
                     entity = boxEntity,
                     occupied = false
@@ -94,9 +100,7 @@ public partial struct SpawnBoxJob : IJobEntity
             }
         }
         
-        
-
-        Entity playerEntity = ecb.Instantiate(playerPrefab.entity);
+        // Spawn player
 
         int playerX = random.NextInt(0, (int)col);
         int playerY = random.NextInt(0, (int)row);
@@ -117,12 +121,35 @@ public partial struct SpawnBoxJob : IJobEntity
         for (int count = 0; count < 5; count++)
         {
             Entity tankEntity = ecb.Instantiate(tankPrefab.entity);
-            
-            tankX = random.NextInt(0, (int)col);
-            tankY = random.NextInt(0, (int)row);
-            tankIndex = (int)col * tankX + tankY;
 
-            
+            // Shitty code looking for unoccupied position 
+            bool openPosition = true;
+            while (true)
+            {
+                openPosition = true;
+                tankX = random.NextInt(0, (int)col);
+                tankY = random.NextInt(0, (int)row);
+                tankIndex = (int)col * tankX + tankY;
+
+                for (int index = 0; index < occupiedIndices.Length; index++)
+                {
+                    if (tankIndex != occupiedIndices[index]) continue;
+                    openPosition = false;
+                }
+
+                if (openPosition)
+                {
+                    occupiedIndices[count + 1] = tankIndex;
+                    break;
+                }
+            }
+
+            // Position tank
+            var tankHeightPos = heights[tankIndex] + 0.5f;
+            ecb.SetComponent(tankEntity, new Translation
+            {
+                Value = new float3(tankX, tankHeightPos, tankY)
+            });
 
         }
     }

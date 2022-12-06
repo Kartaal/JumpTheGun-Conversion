@@ -13,5 +13,5 @@ public struct GameData : IComponentData
     public int height;
     public int width;
 
-    public DynamicBuffer<BoxesComponent> boxes;
+    // public DynamicBuffer<BoxesComponent> boxes;
 }
