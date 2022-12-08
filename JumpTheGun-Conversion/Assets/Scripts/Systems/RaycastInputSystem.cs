@@ -10,7 +10,6 @@ using RaycastHit = Unity.Physics.RaycastHit;
 [UpdateAfter(typeof(SpawnTerrainSystem))]
 public partial class RaycastInputSystem : SystemBase
 {
-
     public BeginSimulationEntityCommandBufferSystem ecbSystem;
     public BuildPhysicsWorld _physicsWorld;
     public CollisionWorld _collisionWorld;
@@ -111,15 +110,15 @@ public partial struct PlayerDirectionJob : IJobEntity
 
 
 
-        if (frames % 60 == 0)
-        {
-            // Debug.Log($"Hitpos: [{hitPos.x}, {hitPos.y}, {hitPos.z}]");
-            // Debug.Log($"GridX: {gridX}");
-            // Debug.Log($"GridY: {gridY}");
-            Debug.Log($"BoxIndex: {boxIndex}");
-            Debug.Log($"Box entity index: {boxEntity.Index}");
-            Debug.Log($"Non-Uniform Scale: {boxScale.Value}");
-        }
+        // if (frames % 60 == 0)
+        // {
+        //     // Debug.Log($"Hitpos: [{hitPos.x}, {hitPos.y}, {hitPos.z}]");
+        //     // Debug.Log($"GridX: {gridX}");
+        //     // Debug.Log($"GridY: {gridY}");
+        //     Debug.Log($"BoxIndex: {boxIndex}");
+        //     Debug.Log($"Box entity index: {boxEntity.Index}");
+        //     Debug.Log($"Non-Uniform Scale: {boxScale.Value}");
+        // }
 
     }
 }
