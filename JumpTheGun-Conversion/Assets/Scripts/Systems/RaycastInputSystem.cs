@@ -66,7 +66,7 @@ public partial class RaycastInputSystem : SystemBase
                 hitPos = hitPos,
                 col = gameData.width,
                 row = gameData.height,
-                // boxes = gameData.boxes,
+                boxes = GetBuffer<BoxesComponent>(gameData.manager),
                 nonuniforms = nonuniforms,
                 frames = UnityEngine.Time.frameCount
             };
@@ -84,10 +84,10 @@ public partial struct PlayerDirectionJob : IJobEntity
     public int col;
     public int row;
     public ComponentDataFromEntity<NonUniformScale> nonuniforms;
-    // public DynamicBuffer<BoxesComponent> boxes;
+    public DynamicBuffer<BoxesComponent> boxes;
     public int frames;
 
-    public void Execute(/*ref GameData gd,*/in Player player, ref DynamicBuffer<BoxesComponent> boxes)
+    public void Execute(in Player player)
     {   
         // Find closest box coords in hitPos direction
         int gridX = (int)math.round(hitPos.x);
@@ -96,7 +96,6 @@ public partial struct PlayerDirectionJob : IJobEntity
 
         if (boxIndex >= boxes.Length) return; // Just testing, ensuring that we don't attempt a non-working index
         
-        // return;
         // Use box coords as index into buffer
         BoxesComponent box = boxes[boxIndex];
         Entity boxEntity = box.entity;

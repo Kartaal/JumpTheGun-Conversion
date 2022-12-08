@@ -30,8 +30,7 @@ public partial class SpawnTerrainSystem : SystemBase
         var job = new SpawnBoxJob
         {
             ecb = ecb,
-            randomSeed = randomSeed,
-            // player = playerEntity
+            randomSeed = randomSeed
         };
 
         var handle = job.Schedule();
@@ -44,10 +43,8 @@ public partial class SpawnTerrainSystem : SystemBase
 public partial struct SpawnBoxJob : IJobEntity
 {
     public EntityCommandBuffer ecb;
-    // public Entity player;
 
     private float height; 
-    // public int width, length;
 
     // Required because Random.Range doesn't work outside main thread
     private Unity.Mathematics.Random random;
@@ -66,8 +63,7 @@ public partial struct SpawnBoxJob : IJobEntity
         
         Entity playerEntity = ecb.Instantiate(playerPrefab.entity);
 
-        //gameData.boxes =
-        var buffer = ecb.AddBuffer<BoxesComponent>(playerEntity); //gameData.manager);
+        var buffer = ecb.AddBuffer<BoxesComponent>(gameData.manager);
         
         for (int i = 0; i < col; i++)
         {
@@ -76,7 +72,6 @@ public partial struct SpawnBoxJob : IJobEntity
                 Entity boxEntity = ecb.Instantiate(prefab.Value);
 
                 // Adding to the DynamicBuffer
-                // gameData.boxes.
                 buffer.Add(new BoxesComponent
                 {
                     entity = boxEntity,
@@ -101,11 +96,10 @@ public partial struct SpawnBoxJob : IJobEntity
         }
         
         // Spawn player
-
         int playerX = random.NextInt(0, (int)col);
         int playerY = random.NextInt(0, (int)row);
         float playerHeight = heights[(int)col * playerX + playerY] + 0.3f;
-        // gameData.boxes[(int)col * playerX + playerY].occupied = true; // Figure out how to do this
+        buffer.ElementAt((int)col * playerX + playerY).occupied = true;
         occupiedIndices[0] = (int)col * playerX + playerY;
 
         ecb.SetComponent(playerEntity, new Translation
@@ -139,6 +133,7 @@ public partial struct SpawnBoxJob : IJobEntity
 
                 if (openPosition)
                 {
+                    buffer.ElementAt(tankIndex).occupied = true;
                     occupiedIndices[count + 1] = tankIndex;
                     break;
                 }
