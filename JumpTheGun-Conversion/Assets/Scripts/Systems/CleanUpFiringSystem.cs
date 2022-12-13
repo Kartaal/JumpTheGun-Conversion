@@ -1,20 +1,43 @@
-﻿using Unity.Collections;
+﻿using Unity.Burst;
 using Unity.Entities;
-using Unity.Jobs;
 
+[UpdateAfter(typeof(CannonballMove))]
+[UpdateAfter(typeof(CannonballSpawningSystem))]
 public partial class CleanUpFiringSystem : SystemBase
 {
-    //convert to job
+    private BeginSimulationEntityCommandBufferSystem ecbSystem;
+
+    protected override void OnCreate()
+    {
+        ecbSystem = World.GetOrCreateSystem<BeginSimulationEntityCommandBufferSystem>();
+    }
+
     protected override void OnUpdate()
     {
-        float dt = Time.DeltaTime;
-
-        Entities.ForEach((ref CannonballData spawner) =>
+        float deltaTime = Time.DeltaTime;
+        var cannonballSpawnJob = new CannonCleanUpJob
         {
-            if (spawner.timeLeft <= 0)
-                EntityManager.DestroyEntity(spawner.entity);
+            ecb = ecbSystem.CreateCommandBuffer(),
+            dt = deltaTime
+        };
 
-            spawner.timeLeft -= dt;
-        }).WithStructuralChanges().Run();
+        var handle = cannonballSpawnJob.Schedule();
+        ecbSystem.AddJobHandleForProducer(handle);
+    }
+}
+
+
+[BurstCompile]
+public partial struct CannonCleanUpJob : IJobEntity
+{
+    public EntityCommandBuffer ecb;
+    public float dt;
+
+    private void Execute(ref CannonballData spawner)
+    {
+        if (spawner.timeLeft <= 0)
+            ecb.DestroyEntity(spawner.entity);
+
+        spawner.timeLeft -= dt;
     }
 }

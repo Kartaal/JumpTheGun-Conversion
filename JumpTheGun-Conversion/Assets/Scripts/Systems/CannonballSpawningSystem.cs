@@ -17,41 +17,48 @@ public partial class CannonballSpawningSystem : SystemBase
 
     protected override void OnUpdate()
     {
-        if (UnityEngine.Time.frameCount % 240 == 0) // Shitty fire rate limitation for now...
-        {
+        float deltaTime = Time.DeltaTime;
+
+        // if (UnityEngine.Time.frameCount % 240 == 0) // Shitty fire rate limitation for now...
+        // {
             Entity cannonballPrefab = GetSingleton<CannonballPrefab>().entity;
 
             var cannonballSpawnJob = new CannonballSpawnJob
             {
                 ecb = ecbSystem.CreateCommandBuffer(),
-                prefab = cannonballPrefab
+                prefab = cannonballPrefab,
+                dt = deltaTime
             };
 
-            var handle = cannonballSpawnJob.Schedule();
-        
-            ecbSystem.AddJobHandleForProducer(handle);
-        }
-        
-        
+           cannonballSpawnJob.Run();
 
+            // ecbSystem.AddJobHandleForProducer(handle);
+        // }
     }
 }
 
 
-[BurstCompile]
-[WithAll(typeof(Tank))]
+// [BurstCompile]
+// [WithAll(typeof(Tank))]
 public partial struct CannonballSpawnJob : IJobEntity
 {
     public EntityCommandBuffer ecb;
     public Entity prefab;
-    
-    public void Execute(in Translation translation)
+    public float dt;
+
+    private void Execute(in Translation translation, ref CannonballSpawnPoint spawnPoint)
     {
-        Entity cannonball = ecb.Instantiate(prefab);
-        
-        ecb.SetComponent(cannonball, new Translation
+
+        spawnPoint.secondsBetweenSpawns += dt;
+        if (spawnPoint.secondsBetweenSpawns > spawnPoint.secondsToNextSpawn)
         {
-            Value = translation.Value
-        });
+            Entity cannonball = ecb.Instantiate(prefab);
+            spawnPoint.secondsBetweenSpawns = 0;
+
+            ecb.SetComponent(cannonball, new Translation
+            {
+                Value = translation.Value
+            });
+        }
     }
 }
