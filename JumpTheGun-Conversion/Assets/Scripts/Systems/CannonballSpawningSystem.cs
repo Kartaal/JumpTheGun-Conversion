@@ -46,7 +46,7 @@ public partial struct CannonballSpawnJob : IJobEntity
     public Entity prefab;
     public float dt;
 
-    private void Execute(in Translation translation, ref CannonballSpawnPoint spawnPoint)
+    private void Execute(in Translation translation, ref Tank spawnPoint)
     {
         //Figure out why there is a delay before the first spawn
         //(unless this it totally correct behaviour, which it might be)

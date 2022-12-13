@@ -115,6 +115,8 @@ public partial struct SpawnBoxJob : IJobEntity
         for (int count = 0; count < 5; count++)
         {
             Entity tankEntity = ecb.Instantiate(tankPrefab.entity);
+            
+            
 
             // Shitty code looking for unoccupied position 
             bool openPosition = true;

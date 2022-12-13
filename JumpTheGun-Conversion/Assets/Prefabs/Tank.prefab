@@ -78,6 +78,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b4fcfcc5345677349b25f1967fda94b6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  entity: {fileID: 1662427287821740}
+  secondsBetweenSpawns: 0
+  secondsToNextSpawn: 5
 --- !u!1 &1604625741975692
 GameObject:
   m_ObjectHideFlags: 0

@@ -18,7 +18,6 @@ public partial class CannonballMove : SystemBase
         float deltaTime = Time.DeltaTime;
         var cannonballSpawnJob = new CannonballMoveJob
         {
-            ecb = ecbSystem.CreateCommandBuffer(),
             dt = deltaTime
         };
 
@@ -29,7 +28,6 @@ public partial class CannonballMove : SystemBase
 
 public partial struct CannonballMoveJob : IJobEntity
 {
-    public EntityCommandBuffer ecb;
     public float dt;
 
     private void Execute(ref Translation trans, ref Rotation rot, ref CannonballData spawner)
