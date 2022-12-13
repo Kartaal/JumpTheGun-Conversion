@@ -4,21 +4,17 @@ using Unity.Jobs;
 
 public partial class CleanUpFiringSystem : SystemBase
 {
+    //convert to job
     protected override void OnUpdate()
     {
+        float dt = Time.DeltaTime;
+
+        Entities.ForEach((ref CannonballData spawner) =>
+        {
+            if (spawner.timeLeft <= 0)
+                EntityManager.DestroyEntity(spawner.entity);
+
+            spawner.timeLeft -= dt;
+        }).WithStructuralChanges().Run();
     }
-    
-    // public struct CleanUpFiringJob:IJobParallelFor
-    // {
-        // [ReadOnly] public EntityArray Entitites;
-        // public EntityCommandBuffer ecb;
-        // public float currentTime;
-        // public ComponentDataArray<Firing> Firings;
-        // public void Execute(int index)
-        // {
-        //     if(currentTime - Firings[index].FiredAt <0.5) return;
-        //     ecb.RemoveComponent<Firing>(Entitites[index]);
-        // }
-    // }
-    
 }

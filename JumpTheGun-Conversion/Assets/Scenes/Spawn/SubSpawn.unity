@@ -216,7 +216,7 @@ GameObject:
   m_Component:
   - component: {fileID: 362316072}
   - component: {fileID: 362316071}
-  - component: {fileID: 362316073}
+  - component: {fileID: 362316075}
   - component: {fileID: 362316074}
   m_Layer: 0
   m_Name: Spawner
@@ -253,23 +253,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &362316073
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 362316070}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 464463be38ea4d1c86a8379a1cca33d8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  entity: {fileID: 1908342676492234, guid: 42c8be3a54506e94081075fd97550674, type: 3}
-  point: {fileID: 1436869353}
-  maxDistanceFromSpawner: 25
-  secondsBetweenSpawns: 6
-  secondsToNextSpawn: 25
 --- !u!114 &362316074
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -283,6 +266,23 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   increasePerSecond: 50
+--- !u!114 &362316075
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 362316070}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c55f1c2a90cb4277aafe74bd34378657, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  entity: {fileID: 1908342676492234, guid: 42c8be3a54506e94081075fd97550674, type: 3}
+  point: {fileID: 1436869353}
+  maxDistanceFromSpawner: 25
+  secondsBetweenSpawns: 5
+  secondsToNextSpawn: 25
 --- !u!1 &1436869353
 GameObject:
   m_ObjectHideFlags: 0

@@ -16,7 +16,7 @@ using UnityEngine;
 //
 // https://www.youtube.com/watch?v=NmqpzyeI6ZM
 
-
+// https://docs.unity3d.com/Packages/com.unity.performance.profile-analyzer@0.4/manual/compare-view.html
 public class SpawnerSystemForEach : ComponentSystem
 {
     private float spawnTimer;
@@ -39,52 +39,14 @@ public class SpawnerSystemForEach : ComponentSystem
             spawner.secondsToNextSpawn += dt;
             if (spawner.secondsToNextSpawn > spawner.secondsBetweenSpawns)
             {
-                spawner.secondsToNextSpawn -= spawner.secondsBetweenSpawns;
+                spawner.secondsToNextSpawn = 0;
 
                 Entity entity = EntityManager.Instantiate(spawner.entity);
                 manager.SetComponentData(entity, EntityManager.GetComponentData<Rotation>(spawner.point));
                 Translation translation = EntityManager.GetComponentData<Translation>(spawner.point);
                 manager.SetComponentData(entity, translation);
-
-                // var x = 1;
-                // var y = 2;
-                // var position = math.transform(localToWorld.Value,
-                //     new float3(x * 2, 0, y * 2));
-                // // translation.Value.z +=  movement.direction * movement.speed * dt;
-                // // translation.Value.z += spawner.maxDistanceFromSpawner * dt;
-                // translation.Value += position;
-                // manager.SetComponentData(entity, translation);
-                //
-                // float ballSpeed = 300;
-                //
-                // translation.Value += ballSpeed * Time.DeltaTime * math.forward(rot.Value);
-                // //
-                // // float ballSpeed = 300;
-                // // float3 dir = float3.zero + translation.Value;
-                // // float3 speed = dir * ballSpeed;
-                // // PhysicsVelocity velocity = new PhysicsVelocity
-                // // {
-                // //     Linear = speed,
-                // //     Angular = float3.zero
-                // // };
-                // //
-                // // // localToWorld.Value = spawner.maxDistanceFromSpawner * dt;
-                // // manager.AddComponentData(entity, velocity);
             }
         });
 
-        Entities.ForEach((ref Translation trans, ref Rotation rot, ref CannonballSpawnPoint spawner) =>
-        {
-            trans.Value += spawner.maxDistanceFromSpawner * Time.DeltaTime * math.forward(rot.Value) * dt;
-        });
-        
-        Entities.ForEach((ref CannonballData spawner) =>
-        {
-            Debug.Log(spawner.timeLeft);
-            if (spawner.timeLeft <= 0)
-                EntityManager.DestroyEntity(spawner.entity);
-
-            spawner.timeLeft -= dt;
-        });
     }
 }
