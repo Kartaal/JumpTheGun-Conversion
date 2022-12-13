@@ -21,24 +21,24 @@ public partial class CannonballSpawningSystem : SystemBase
 
         // if (UnityEngine.Time.frameCount % 240 == 0) // Shitty fire rate limitation for now...
         // {
-            Entity cannonballPrefab = GetSingleton<CannonballPrefab>().entity;
+        Entity cannonballPrefab = GetSingleton<CannonballPrefab>().entity;
 
-            var cannonballSpawnJob = new CannonballSpawnJob
-            {
-                ecb = ecbSystem.CreateCommandBuffer(),
-                prefab = cannonballPrefab,
-                dt = deltaTime
-            };
+        var cannonballSpawnJob = new CannonballSpawnJob
+        {
+            ecb = ecbSystem.CreateCommandBuffer(),
+            prefab = cannonballPrefab,
+            dt = deltaTime
+        };
 
-           cannonballSpawnJob.Run();
+        cannonballSpawnJob.Run();
 
-            // ecbSystem.AddJobHandleForProducer(handle);
+        // ecbSystem.AddJobHandleForProducer(handle);
         // }
     }
 }
 
 
-// [BurstCompile]
+[BurstCompile]
 // [WithAll(typeof(Tank))]
 public partial struct CannonballSpawnJob : IJobEntity
 {
@@ -48,7 +48,8 @@ public partial struct CannonballSpawnJob : IJobEntity
 
     private void Execute(in Translation translation, ref CannonballSpawnPoint spawnPoint)
     {
-
+        //Figure out why there is a delay before the first spawn
+        //(unless this it totally correct behaviour, which it might be)
         spawnPoint.secondsBetweenSpawns += dt;
         if (spawnPoint.secondsBetweenSpawns > spawnPoint.secondsToNextSpawn)
         {
