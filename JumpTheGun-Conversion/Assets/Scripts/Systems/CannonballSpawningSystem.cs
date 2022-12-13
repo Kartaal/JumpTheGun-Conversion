@@ -17,41 +17,49 @@ public partial class CannonballSpawningSystem : SystemBase
 
     protected override void OnUpdate()
     {
-        if (UnityEngine.Time.frameCount % 240 == 0) // Shitty fire rate limitation for now...
+        float deltaTime = Time.DeltaTime;
+
+        // if (UnityEngine.Time.frameCount % 240 == 0) // Shitty fire rate limitation for now...
+        // {
+        Entity cannonballPrefab = GetSingleton<CannonballPrefab>().entity;
+
+        var cannonballSpawnJob = new CannonballSpawnJob
         {
-            Entity cannonballPrefab = GetSingleton<CannonballPrefab>().entity;
+            ecb = ecbSystem.CreateCommandBuffer(),
+            prefab = cannonballPrefab,
+            dt = deltaTime
+        };
 
-            var cannonballSpawnJob = new CannonballSpawnJob
-            {
-                ecb = ecbSystem.CreateCommandBuffer(),
-                prefab = cannonballPrefab
-            };
+        cannonballSpawnJob.Run();
 
-            var handle = cannonballSpawnJob.Schedule();
-        
-            ecbSystem.AddJobHandleForProducer(handle);
-        }
-        
-        
-
+        // ecbSystem.AddJobHandleForProducer(handle);
+        // }
     }
 }
 
 
 [BurstCompile]
-[WithAll(typeof(Tank))]
+// [WithAll(typeof(Tank))]
 public partial struct CannonballSpawnJob : IJobEntity
 {
     public EntityCommandBuffer ecb;
     public Entity prefab;
-    
-    public void Execute(in Translation translation)
+    public float dt;
+
+    private void Execute(in Translation translation, ref CannonballSpawnPoint spawnPoint)
     {
-        Entity cannonball = ecb.Instantiate(prefab);
-        
-        ecb.SetComponent(cannonball, new Translation
+        //Figure out why there is a delay before the first spawn
+        //(unless this it totally correct behaviour, which it might be)
+        spawnPoint.secondsBetweenSpawns += dt;
+        if (spawnPoint.secondsBetweenSpawns > spawnPoint.secondsToNextSpawn)
         {
-            Value = translation.Value
-        });
+            Entity cannonball = ecb.Instantiate(prefab);
+            spawnPoint.secondsBetweenSpawns = 0;
+
+            ecb.SetComponent(cannonball, new Translation
+            {
+                Value = translation.Value
+            });
+        }
     }
 }

@@ -6,7 +6,6 @@ public struct CannonballSpawnPoint : IComponentData
 {
     public Entity entity;
     public Entity point;
-    public float maxDistanceFromSpawner;
     public float secondsBetweenSpawns;
     public float secondsToNextSpawn;
 }

@@ -97,5 +97,5 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   entity: {fileID: 1908342676492234}
-  timeLeft: 5
+  timeLeft: 12
   speed: 10
