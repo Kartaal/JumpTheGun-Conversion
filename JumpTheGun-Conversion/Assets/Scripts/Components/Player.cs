@@ -6,5 +6,6 @@ using Unity.Mathematics;
 [GenerateAuthoringComponent]
 public struct Player : IComponentData
 {
-    public Entity entity;
+    public int targetX;
+    public int targetY;
 }

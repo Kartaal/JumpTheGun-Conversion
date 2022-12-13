@@ -25,6 +25,8 @@ public partial class RaycastInputSystem : SystemBase
 
     protected override void OnUpdate()
     {
+        float dt = Time.DeltaTime;
+        
         // Debugging things...
         if(Input.GetKey(KeyCode.A))
             Debug.Break();
@@ -67,7 +69,8 @@ public partial class RaycastInputSystem : SystemBase
                 row = gameData.height,
                 boxes = GetBuffer<BoxesComponent>(gameData.manager),
                 nonuniforms = nonuniforms,
-                frames = UnityEngine.Time.frameCount
+                frames = UnityEngine.Time.frameCount,
+                dt = dt
             };
 
             var handle = playerDirJob.Schedule();
@@ -76,7 +79,8 @@ public partial class RaycastInputSystem : SystemBase
     }
 }
 
-[BurstCompile]
+//[BurstCompile]
+//[WithAll(typeof(Player))]
 public partial struct PlayerDirectionJob : IJobEntity
 {
     public float3 hitPos;
@@ -86,27 +90,106 @@ public partial struct PlayerDirectionJob : IJobEntity
     public DynamicBuffer<BoxesComponent> boxes;
     public int frames;
 
-    public void Execute(in Player player)
-    {   
+    public float dt;
+
+    public void Execute(ref Player player, ref ParabolaComp parabola, in Translation translation)
+    {
         // Find closest box coords in hitPos direction
         int gridX = (int)math.round(hitPos.x);
         int gridY = (int)math.round(hitPos.z);
-        int boxIndex = col * gridX + gridY;
+        //int gridBoxIndex = col * gridX + gridY;
 
-        if (boxIndex >= boxes.Length) return; // Just testing, ensuring that we don't attempt a non-working index
+        int playerGridX = (int)math.round(translation.Value.x);
+        int playerGridY = (int)math.round(translation.Value.z);
+
+        int targetX = gridX;
+        int targetY = gridY;
+
+        parabola.t += dt;
+
+        if (math.abs(gridX - playerGridX) > 1 || math.abs(gridY - playerGridY) > 1)
+        {
+            //movePos = currentPos;
+            targetX = playerGridX;
+            targetY = playerGridY;
+
+            if (gridX != playerGridX)
+            {
+                // +- 1 for direction increment
+                targetX += gridX > playerGridX ? 1 : -1;
+            }
+
+            if (gridY != playerGridY)
+            {
+                targetY += gridY > playerGridY ? 1 : -1;
+            }
+
+            int targetBoxIndex = col * targetX + targetY;
+            BoxesComponent box = boxes[targetBoxIndex];
+            if (box.occupied)
+            {
+                targetX = playerGridX;
+                targetY = playerGridY;
+            }
+
+            player.targetX = targetX;
+            player.targetY = targetY;
+
+            // create/overwrite parabola...
+
+            // t > 1 means bounce is complete (IDLE)
+            // 0 < t < 1 means bounce is ongoing (BOUNCING)
+            //parabola.t += dt;
+            if (parabola.t >= 1.0f)
+            {
+                Debug.Log($"starting new bounce");
+                
+                Entity gridBoxEntity = box.entity;
+                NonUniformScale gridBoxScale = nonuniforms[gridBoxEntity];
+                float startY = gridBoxScale.Value.y; // + jump offset?
+
+                //int targetBoxIndex = col * targetX + targetY;
+                BoxesComponent targetBox = boxes[targetBoxIndex];
+                Entity targetBoxEntity = targetBox.entity;
+                NonUniformScale targetBoxScale = nonuniforms[targetBoxEntity];
+                float endY = targetBoxScale.Value.y; // + jump offset?
+
+                float height = math.max(startY, endY);
+                height += parabola.BOUNCE_HEIGHT;
+
+                //NewParabola(startY, endY, height, parabola);
+                // make new parabola!
+                parabola.c = startY;
+
+                float k = math.sqrt(math.abs(startY - height)) /
+                          (math.sqrt(math.abs(startY - height)) +
+                           math.sqrt(math.abs(endY - height)));
+
+                parabola.a = (height - startY - k * (endY - startY)) / (k * k - k);
+
+                parabola.b = endY - startY - parabola.a;
+                parabola.t = 0f;
+            }
+        }
+
+    
+
+
+        
+        //if (gridBoxIndex >= boxes.Length) return; // Just testing, ensuring that we don't attempt a non-working index
         
         // Use box coords as index into buffer
-        BoxesComponent box = boxes[boxIndex];
-        Entity boxEntity = box.entity;
+        
+        //Entity boxEntity = box.entity;
 
         // Use calculations from original code for height value of parabola and the parabola parameters
-        NonUniformScale boxScale = nonuniforms[boxEntity];
+        //NonUniformScale boxScale = nonuniforms[boxEntity];
 
         //    boxTranslation.y; // use for height calculations of parabola, see original code in Player
 
 
         // Set parabola params...
-
+        
 
 
 
@@ -121,4 +204,5 @@ public partial struct PlayerDirectionJob : IJobEntity
         // }
 
     }
+
 }
