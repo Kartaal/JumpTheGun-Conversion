@@ -18,11 +18,6 @@ public partial class PlayerBounceSystem : SystemBase
 
     protected override void OnUpdate()
     {
-        //float a = 0f;
-        //float b = 0f;
-        //float c = 0f;
-        //Parabola.Create(0f, 0f, 0f, out a, out b, out c);
-
         var playerBounceJob = new PlayerBounceJob
         {
             
@@ -32,17 +27,19 @@ public partial class PlayerBounceSystem : SystemBase
     }
 }
 
+/**
+ * Reads data from player's parabola-component and updates player translation
+ */
 //[BurstCompile]
-//[WithAll(typeof(Player))] //playerprefab instead?
+//[WithAll(typeof(Player))]
 public partial struct PlayerBounceJob : IJobEntity
 {
-    public void Execute(ref Player player, ref ParabolaComp parabola, ref Translation translation)
+    public void Execute(ref Player player, in ParabolaComp parabola, ref Translation translation)
     {
-        //Debug.Log($"parabola time is {parabola.t}");
         if (parabola.t <= 1f)
         {
-            float y = Parabola.Solve(parabola.a, parabola.b, parabola.c, parabola.t);
-
+            float y = parabola.a * parabola.t * parabola.t + 
+                      parabola.b * parabola.t + parabola.c;
             float x = math.lerp(translation.Value.x, player.targetX, parabola.t);
             float z = math.lerp(translation.Value.z, player.targetY, parabola.t);
 

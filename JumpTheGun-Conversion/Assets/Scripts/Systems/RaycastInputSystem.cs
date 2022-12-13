@@ -1,3 +1,4 @@
+using System;
 using Unity.Burst;
 using Unity.Entities;
 using Unity.Mathematics;
@@ -94,6 +95,9 @@ public partial struct PlayerDirectionJob : IJobEntity
 
     public void Execute(ref Player player, ref ParabolaComp parabola, in Translation translation)
     {
+        parabola.t += dt;
+        if (parabola.t < 1f) return; // discard player input if mid-bounce
+        
         // Find closest box coords in hitPos direction
         int gridX = (int)math.round(hitPos.x);
         int gridY = (int)math.round(hitPos.z);
@@ -105,27 +109,37 @@ public partial struct PlayerDirectionJob : IJobEntity
         int targetX = gridX;
         int targetY = gridY;
 
-        parabola.t += dt;
+        int targetBoxIndex = col * targetX + targetY;
+        //BoxesComponent box = boxes[targetBoxIndex]; // FIXME: sanitize this?
+        BoxesComponent box;
+        try
+        {
+            box = boxes[targetBoxIndex];
+        }
+        catch (Exception e)
+        {
+            Debug.Log($"failed attempt to target box at index {targetBoxIndex}, " +
+                      $"from coords x:{targetX} y:{targetY}");
+            return;
+        }
 
         if (math.abs(gridX - playerGridX) > 1 || math.abs(gridY - playerGridY) > 1)
         {
-            //movePos = currentPos;
             targetX = playerGridX;
             targetY = playerGridY;
 
+            // increments single step target position towards mouse position
             if (gridX != playerGridX)
             {
-                // +- 1 for direction increment
                 targetX += gridX > playerGridX ? 1 : -1;
             }
-
             if (gridY != playerGridY)
             {
                 targetY += gridY > playerGridY ? 1 : -1;
             }
 
-            int targetBoxIndex = col * targetX + targetY;
-            BoxesComponent box = boxes[targetBoxIndex];
+            targetBoxIndex = col * targetX + targetY;
+            box = boxes[targetBoxIndex];
             if (box.occupied)
             {
                 targetX = playerGridX;
@@ -134,43 +148,42 @@ public partial struct PlayerDirectionJob : IJobEntity
 
             player.targetX = targetX;
             player.targetY = targetY;
-
-            // create/overwrite parabola...
-
-            // t > 1 means bounce is complete (IDLE)
-            // 0 < t < 1 means bounce is ongoing (BOUNCING)
-            //parabola.t += dt;
-            if (parabola.t >= 1.0f)
-            {
-                Debug.Log($"starting new bounce");
-                
-                Entity gridBoxEntity = box.entity;
-                NonUniformScale gridBoxScale = nonuniforms[gridBoxEntity];
-                float startY = gridBoxScale.Value.y; // + jump offset?
-
-                //int targetBoxIndex = col * targetX + targetY;
-                BoxesComponent targetBox = boxes[targetBoxIndex];
-                Entity targetBoxEntity = targetBox.entity;
-                NonUniformScale targetBoxScale = nonuniforms[targetBoxEntity];
-                float endY = targetBoxScale.Value.y; // + jump offset?
-
-                float height = math.max(startY, endY);
-                height += parabola.BOUNCE_HEIGHT;
-
-                //NewParabola(startY, endY, height, parabola);
-                // make new parabola!
-                parabola.c = startY;
-
-                float k = math.sqrt(math.abs(startY - height)) /
-                          (math.sqrt(math.abs(startY - height)) +
-                           math.sqrt(math.abs(endY - height)));
-
-                parabola.a = (height - startY - k * (endY - startY)) / (k * k - k);
-
-                parabola.b = endY - startY - parabola.a;
-                parabola.t = 0f;
-            }
         }
+        
+        // create/overwrite parabola...
+        // t > 1 means bounce is complete (IDLE)
+        // 0 < t < 1 means bounce is ongoing (BOUNCING)
+        
+        if (parabola.t >= 1.0f) // this check can be removed(?), see start of method-body
+        {
+            Debug.Log($"new bounce from {translation.Value.x}|{translation.Value.z} to {hitPos.x}|{hitPos.z}" +
+                      $" - rounded to: {gridX}|{gridY}");
+                
+            Entity gridBoxEntity = box.entity;
+            NonUniformScale gridBoxScale = nonuniforms[gridBoxEntity];
+            float startY = gridBoxScale.Value.y; // + jump offset?
+
+            //int targetBoxIndex = col * targetX + targetY;
+            BoxesComponent targetBox = boxes[targetBoxIndex];
+            Entity targetBoxEntity = targetBox.entity;
+            NonUniformScale targetBoxScale = nonuniforms[targetBoxEntity];
+            float endY = targetBoxScale.Value.y; // + jump offset?
+
+            float height = math.max(startY, endY);
+            height += parabola.BOUNCE_HEIGHT;
+            
+            // calculate new parabola! (overwrites data in parabola component)
+            parabola.c = startY;
+
+            float k = math.sqrt(math.abs(startY - height)) /
+                      (math.sqrt(math.abs(startY - height)) +
+                       math.sqrt(math.abs(endY - height)));
+
+            parabola.a = (height - startY - k * (endY - startY)) / (k * k - k);
+            parabola.b = endY - startY - parabola.a;
+            parabola.t = 0f; // reset t to start new parabola movement
+        } 
+    }
 
     
 
@@ -203,6 +216,6 @@ public partial struct PlayerDirectionJob : IJobEntity
         //     Debug.Log($"Non-Uniform Scale: {boxScale.Value}");
         // }
 
-    }
-
 }
+
+
