@@ -4,9 +4,7 @@ using Unity.Entities;
 using Unity.Mathematics;
 
 [GenerateAuthoringComponent]
-public struct Player : IComponentData
+public struct TriggerApplyScaleTag : IComponentData
 {
-    public int targetX;
-    public int targetY;
-    public bool isDead;
+   
 }

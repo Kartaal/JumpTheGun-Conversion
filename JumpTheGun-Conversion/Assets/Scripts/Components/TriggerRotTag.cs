@@ -4,9 +4,7 @@ using Unity.Entities;
 using Unity.Mathematics;
 
 [GenerateAuthoringComponent]
-public struct Player : IComponentData
+public struct TriggerRotTag : IComponentData
 {
-    public int targetX;
-    public int targetY;
-    public bool isDead;
+
 }
