@@ -6,5 +6,5 @@ using UnityEngine;
 [GenerateAuthoringComponent]
 public struct DealDamage : IComponentData
 {
-    public int Value;
+    public float Value;
 }

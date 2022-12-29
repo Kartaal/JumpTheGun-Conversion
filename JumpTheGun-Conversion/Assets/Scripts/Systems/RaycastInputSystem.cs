@@ -67,7 +67,7 @@ public partial class RaycastInputSystem : SystemBase
             {
                 hitPos = hitPos,
                 col = gameData.width,
-                row = gameData.height,
+                row = (int)gameData.height,
                 boxes = GetBuffer<BoxesComponent>(gameData.manager),
                 nonuniforms = nonuniforms,
                 frames = UnityEngine.Time.frameCount,

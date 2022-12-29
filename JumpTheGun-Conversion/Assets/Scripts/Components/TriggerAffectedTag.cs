@@ -2,7 +2,6 @@
 using UnityEngine;
 
 [GenerateAuthoringComponent]
-public struct TriggerAffectedTag : IComponentData 
+public struct TriggerAffectedTag : IComponentData
 {
-    
 }

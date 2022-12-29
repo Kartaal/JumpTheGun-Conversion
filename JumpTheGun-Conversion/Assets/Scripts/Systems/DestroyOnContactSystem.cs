@@ -2,7 +2,7 @@
 using Unity.Collections;
 using Unity.Entities;
 
-[UpdateAfter(typeof(DamageCollisionSystem))]
+[UpdateAfter(typeof(DamageBoxesSystem))]
 public partial class DestroyOnContactSystem : SystemBase
 {
     private BeginSimulationEntityCommandBufferSystem ecbSystem;

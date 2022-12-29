@@ -38,21 +38,21 @@ public partial class RestartSceneScript : SystemBase
         };
         var jobHandle = aimJob.Schedule();
         ecbSystem.AddJobHandleForProducer(jobHandle);
-        //kill then reload
-        Debug.Log("EndMe");
-        m_SceneSystem.UnloadScene(sceneEntity);
-        Debug.Log("RevMe");
-        m_SceneSystem.LoadSceneAsync(sceneEntity);
-
-        if (aimJob.done)
-        {
-            Debug.Log("EndMe");
-            m_SceneSystem.UnloadScene(sceneEntity);
-            //// reloadscene
-            // EntityManager.DestroyEntity(m_NewRequests);
-            // m_NewRequests.Dispose();
-            // m_SceneSystem.UnloadScene(sceneEntity);
-        }
+        // //kill, then reload
+        // Debug.Log("EndMe");
+        // m_SceneSystem.UnloadScene(sceneEntity);
+        // Debug.Log("RevMe");
+        // m_SceneSystem.LoadSceneAsync(sceneEntity);
+        //// not working at the moment
+        // if (aimJob.done)
+        // {
+        //     Debug.Log("EndMe");
+        //     m_SceneSystem.UnloadScene(sceneEntity);
+        //     //// reloadscene
+        //     // EntityManager.DestroyEntity(m_NewRequests);
+        //     // m_NewRequests.Dispose();
+        //     // m_SceneSystem.UnloadScene(sceneEntity);
+        // }
 
 
         // // var entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
@@ -75,10 +75,8 @@ public partial struct RestartSceneJob : IJobEntity
         if (player.isDead && health.Value <= 5)
         {
             // sceneSystem.LoadSceneAsync(requests[0].Guid);
-
-            done = true;
-
-            Debug.Log("EndMe");
+            // done = true;
+            // Debug.Log("EndMe");
             // ecb.DestroyEntity(entity);
             // sceneSystem.UnloadScene(scene);
         }
