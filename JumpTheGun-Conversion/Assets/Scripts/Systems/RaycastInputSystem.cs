@@ -27,6 +27,7 @@ public partial class RaycastInputSystem : SystemBase
     protected override void OnUpdate()
     {
         float dt = Time.DeltaTime;
+        //var dt = Time.fixedDeltaTime;
         
         // Debugging things...
         if(Input.GetKey(KeyCode.A))
@@ -41,7 +42,7 @@ public partial class RaycastInputSystem : SystemBase
             _collisionWorld = _physicsWorld.PhysicsWorld.CollisionWorld;
             var ray = Camera.main.ScreenPointToRay(Input.mousePosition);
             var rayOrigin = ray.origin;
-            var rayEnd = ray.GetPoint(100f);
+            var rayEnd = ray.GetPoint(20f);
 
             raycastInput = new RaycastInput
             {

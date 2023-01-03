@@ -30,7 +30,7 @@ public partial struct CannonballMoveJob : IJobEntity
 {
     public float dt;
 
-    private void Execute(ref Translation trans, ref Rotation rot, ref CannonballData spawner)
+    private void Execute(ref Translation trans, in Rotation rot, in CannonballData spawner)
     {
         trans.Value += spawner.speed * math.forward(rot.Value) * dt;
     }
