@@ -6,6 +6,7 @@ using Unity.Mathematics;
 using Unity.Transforms;
 using UnityEngine;
 
+[UpdateAfter(typeof(RaycastInputSystem))]
 public partial class PlayerBounceSystem : SystemBase
 {
     private BeginSimulationEntityCommandBufferSystem ecbSystem;
@@ -34,7 +35,7 @@ public partial class PlayerBounceSystem : SystemBase
 //[WithAll(typeof(Player))]
 public partial struct PlayerBounceJob : IJobEntity
 {
-    public void Execute(ref Player player, in ParabolaComp parabola, ref Translation translation)
+    public void Execute(in Player player, in ParabolaComp parabola, ref Translation translation)
     {
         if (parabola.t <= 1f)
         {

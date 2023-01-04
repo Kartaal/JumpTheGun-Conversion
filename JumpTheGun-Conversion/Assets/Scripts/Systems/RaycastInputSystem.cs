@@ -1,5 +1,3 @@
-using System;
-using Unity.Burst;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Physics;
@@ -16,14 +14,11 @@ public partial class RaycastInputSystem : SystemBase
     public CollisionWorld _collisionWorld;
 
     public GameData _gameData;
-
-    public Vector3 mouseWorldPos;
     
     protected override void OnCreate()
     {
         ecbSystem = World.GetOrCreateSystem<BeginSimulationEntityCommandBufferSystem>();
         _physicsWorld = World.GetOrCreateSystem<BuildPhysicsWorld>();
-        //var gameData = GetSingleton<GameData>();
         RequireSingletonForUpdate<Player>();
     }
 
@@ -38,13 +33,11 @@ public partial class RaycastInputSystem : SystemBase
     protected override void OnUpdate()
     {
         float dt = Time.DeltaTime;
-        //var dt = Time.fixedDeltaTime;
         
         // Debugging things...
         if(Input.GetKey(KeyCode.A))
             Debug.Break();
         
-        var ecb = ecbSystem.CreateCommandBuffer().AsParallelWriter();
         RaycastInput raycastInput = new RaycastInput();
         RaycastHit raycastHit;
 
@@ -83,7 +76,7 @@ public partial class RaycastInputSystem : SystemBase
                 row = gameData.height,
                 boxes = GetBuffer<BoxesComponent>(gameData.manager),
                 nonuniforms = nonuniforms,
-                frames = UnityEngine.Time.frameCount,
+                // frames = UnityEngine.Time.frameCount,
                 dt = dt
             };
 
@@ -94,7 +87,6 @@ public partial class RaycastInputSystem : SystemBase
 }
 
 //[BurstCompile]
-//[WithAll(typeof(Player))]
 public partial struct PlayerDirectionJob : IJobEntity
 {
     public float3 hitPos;
@@ -102,7 +94,7 @@ public partial struct PlayerDirectionJob : IJobEntity
     public int row;
     public ComponentDataFromEntity<NonUniformScale> nonuniforms;
     public DynamicBuffer<BoxesComponent> boxes;
-    public int frames;
+    // public int frames;
 
     public float dt;
 
@@ -114,7 +106,6 @@ public partial struct PlayerDirectionJob : IJobEntity
         // Find closest box coords in hitPos direction
         int gridX = (int)math.round(hitPos.x);
         int gridY = (int)math.round(hitPos.z);
-        //int gridBoxIndex = col * gridX + gridY;
 
         int playerGridX = (int)math.round(translation.Value.x);
         int playerGridY = (int)math.round(translation.Value.z);
@@ -122,21 +113,27 @@ public partial struct PlayerDirectionJob : IJobEntity
         int targetX = gridX;
         int targetY = gridY;
 
-        int targetBoxIndex = col * targetX + targetY;
-        //BoxesComponent box = boxes[targetBoxIndex]; // FIXME: sanitize this?
-        BoxesComponent box;
-        try
-        {
-            box = boxes[targetBoxIndex];
-        }
-        catch (Exception e)
-        {
-            Debug.Log($"failed attempt to target box at index {targetBoxIndex}, " +
-                      $"from coords x:{targetX} y:{targetY}");
-            return;
-        }
+        // int targetBoxIndex = col * targetX + targetY;
+        // //BoxesComponent box = boxes[targetBoxIndex]; // FIXME: sanitize this?
+        // BoxesComponent box;
+        // try
+        // {
+        //     box = boxes[targetBoxIndex];
+        // }
+        // catch (Exception e)
+        // {
+        //     Debug.Log($"failed attempt to target box at index {targetBoxIndex}, " +
+        //               $"from coords x:{targetX} y:{targetY}");
+        //     return;
+        // }
 
         bool targetOccupied = false;
+
+        // Debug.Log($"Rounded hit: ({gridX}, {gridY})");
+        // Debug.Log($"Player grid: ({playerGridX}, {playerGridY})");
+        // Debug.Log($"X offset: {math.abs(gridX - playerGridX)}");
+        // Debug.Log($"Y offset: {math.abs(gridY - playerGridY)}");
+        // Debug.Log("");
         
         if (math.abs(gridX - playerGridX) > 1 || math.abs(gridY - playerGridY) > 1)
         {
@@ -152,19 +149,25 @@ public partial struct PlayerDirectionJob : IJobEntity
             {
                 targetY += gridY > playerGridY ? 1 : -1;
             }
-
-            targetBoxIndex = col * targetX + targetY;
-            box = boxes[targetBoxIndex];
-            if (box.occupied)
-            {
-                targetX = playerGridX;
-                targetY = playerGridY;
-                targetOccupied = true; // FIXME: this flag doesn't translate to the debug print, bug?
-            }
-
-            player.targetX = targetX;
-            player.targetY = targetY;
         }
+
+        // Avoid going outside the grid, col and row -1 because 0-indexed array
+        if (targetX < 0 || targetX > col-1) targetX = playerGridX;
+        if (targetY < 0 || targetY > row-1) targetY = playerGridY;
+        
+
+        int targetBoxIndex = col * targetX + targetY;
+        BoxesComponent box = boxes[targetBoxIndex];
+        if (box.occupied)
+        {
+            targetX = playerGridX;
+            targetY = playerGridY;
+            targetOccupied = true; // FIXME: this flag doesn't translate to the debug print, bug?
+        }
+
+        player.targetX = targetX;
+        player.targetY = targetY;
+        
         
         // create/overwrite parabola...
         // t > 1 means bounce is complete (IDLE)
@@ -179,7 +182,6 @@ public partial struct PlayerDirectionJob : IJobEntity
             NonUniformScale gridBoxScale = nonuniforms[gridBoxEntity];
             float startY = gridBoxScale.Value.y; // + jump offset?
 
-            //int targetBoxIndex = col * targetX + targetY;
             BoxesComponent targetBox = boxes[targetBoxIndex];
             Entity targetBoxEntity = targetBox.entity;
             NonUniformScale targetBoxScale = nonuniforms[targetBoxEntity];
@@ -200,38 +202,6 @@ public partial struct PlayerDirectionJob : IJobEntity
             parabola.t = 0f; // reset t to start new parabola movement
         } 
     }
-
-    
-
-
-        
-        //if (gridBoxIndex >= boxes.Length) return; // Just testing, ensuring that we don't attempt a non-working index
-        
-        // Use box coords as index into buffer
-        
-        //Entity boxEntity = box.entity;
-
-        // Use calculations from original code for height value of parabola and the parabola parameters
-        //NonUniformScale boxScale = nonuniforms[boxEntity];
-
-        //    boxTranslation.y; // use for height calculations of parabola, see original code in Player
-
-
-        // Set parabola params...
-        
-
-
-
-        // if (frames % 60 == 0)
-        // {
-        //     // Debug.Log($"Hitpos: [{hitPos.x}, {hitPos.y}, {hitPos.z}]");
-        //     // Debug.Log($"GridX: {gridX}");
-        //     // Debug.Log($"GridY: {gridY}");
-        //     Debug.Log($"BoxIndex: {boxIndex}");
-        //     Debug.Log($"Box entity index: {boxEntity.Index}");
-        //     Debug.Log($"Non-Uniform Scale: {boxScale.Value}");
-        // }
-
 }
 
 

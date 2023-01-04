@@ -5,7 +5,7 @@ using Unity.Jobs;
 using Unity.Mathematics;
 using Unity.Transforms;
 
-[UpdateAfter(typeof(SpawnTerrainSystem))]
+[UpdateAfter(typeof(TankAiming))]
 public partial class CannonballSpawningSystem : SystemBase
 {
     public BeginSimulationEntityCommandBufferSystem ecbSystem;
@@ -18,9 +18,7 @@ public partial class CannonballSpawningSystem : SystemBase
     protected override void OnUpdate()
     {
         float deltaTime = Time.DeltaTime;
-
-        // if (UnityEngine.Time.frameCount % 240 == 0) // Shitty fire rate limitation for now...
-        // {
+        
         Entity cannonballPrefab = GetSingleton<CannonballPrefab>().entity;
 
         var cannonballSpawnJob = new CannonballSpawnJob
@@ -30,16 +28,14 @@ public partial class CannonballSpawningSystem : SystemBase
             dt = deltaTime
         };
 
-        cannonballSpawnJob.Run();
+        var handle = cannonballSpawnJob.Schedule();
 
-        // ecbSystem.AddJobHandleForProducer(handle);
-        // }
+        ecbSystem.AddJobHandleForProducer(handle);
     }
 }
 
 
 [BurstCompile]
-// [WithAll(typeof(Tank))]
 public partial struct CannonballSpawnJob : IJobEntity
 {
     public EntityCommandBuffer ecb;

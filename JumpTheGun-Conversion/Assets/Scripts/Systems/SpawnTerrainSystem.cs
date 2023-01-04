@@ -99,7 +99,6 @@ public partial struct SpawnBoxJob : IJobEntity
         int playerX = random.NextInt(0, (int)col);
         int playerY = random.NextInt(0, (int)row);
         float playerHeight = heights[(int)col * playerX + playerY] + 0.3f;
-        buffer.ElementAt((int)col * playerX + playerY).occupied = true;
         occupiedIndices[0] = (int)col * playerX + playerY;
 
         ecb.SetComponent(playerEntity, new Translation
@@ -147,8 +146,11 @@ public partial struct SpawnBoxJob : IJobEntity
             {
                 Value = new float3(tankX, tankHeightPos, tankY)
             });
-
         }
+
+        // Remember to clean up after yourself
+        heights.Dispose();
+        occupiedIndices.Dispose();
     }
 
 }
