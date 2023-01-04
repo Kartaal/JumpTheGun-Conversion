@@ -8,4 +8,6 @@ public struct Player : IComponentData
 {
     public int targetX;
     public int targetY;
+    public int currentX;
+    public int currentY;
 }

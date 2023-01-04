@@ -40,6 +40,8 @@ public partial struct PlayerBounceJob : IJobEntity
         {
             float y = parabola.a * parabola.t * parabola.t + 
                       parabola.b * parabola.t + parabola.c;
+            
+            // FIXME: If player.target coords are invalid, jump to current position instead
             float x = math.lerp(translation.Value.x, player.targetX, parabola.t);
             float z = math.lerp(translation.Value.z, player.targetY, parabola.t);
 

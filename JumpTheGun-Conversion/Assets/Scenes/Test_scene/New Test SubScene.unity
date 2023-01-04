@@ -176,6 +176,7 @@ MonoBehaviour:
   maxHeight: 5
   height: 10
   width: 10
+  raycastDistance: 20
 --- !u!114 &22744348
 MonoBehaviour:
   m_ObjectHideFlags: 0

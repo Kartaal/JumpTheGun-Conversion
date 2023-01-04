@@ -15,13 +15,24 @@ public partial class RaycastInputSystem : SystemBase
     public BuildPhysicsWorld _physicsWorld;
     public CollisionWorld _collisionWorld;
 
+    public GameData _gameData;
+
     public Vector3 mouseWorldPos;
     
     protected override void OnCreate()
     {
         ecbSystem = World.GetOrCreateSystem<BeginSimulationEntityCommandBufferSystem>();
         _physicsWorld = World.GetOrCreateSystem<BuildPhysicsWorld>();
+        //var gameData = GetSingleton<GameData>();
         RequireSingletonForUpdate<Player>();
+    }
+
+    protected override void OnStartRunning()
+    {
+        if (_gameData.Equals(null))
+        {
+            _gameData = GetSingleton<GameData>(); // OBS: this approach is currently not working or active
+        } 
     }
 
     protected override void OnUpdate()
@@ -42,7 +53,8 @@ public partial class RaycastInputSystem : SystemBase
             _collisionWorld = _physicsWorld.PhysicsWorld.CollisionWorld;
             var ray = Camera.main.ScreenPointToRay(Input.mousePosition);
             var rayOrigin = ray.origin;
-            var rayEnd = ray.GetPoint(20f);
+            var rayEnd = ray.GetPoint(30f);
+            //var rayEnd = ray.GetPoint(_gameData.raycastDistance);
 
             raycastInput = new RaycastInput
             {
@@ -124,6 +136,8 @@ public partial struct PlayerDirectionJob : IJobEntity
             return;
         }
 
+        bool targetOccupied = false;
+        
         if (math.abs(gridX - playerGridX) > 1 || math.abs(gridY - playerGridY) > 1)
         {
             targetX = playerGridX;
@@ -145,6 +159,7 @@ public partial struct PlayerDirectionJob : IJobEntity
             {
                 targetX = playerGridX;
                 targetY = playerGridY;
+                targetOccupied = true;
             }
 
             player.targetX = targetX;
@@ -158,7 +173,7 @@ public partial struct PlayerDirectionJob : IJobEntity
         if (parabola.t >= 1.0f) // this check can be removed(?), see start of method-body
         {
             Debug.Log($"new bounce from {translation.Value.x}|{translation.Value.z} to {hitPos.x}|{hitPos.z}" +
-                      $" - rounded to: {gridX}|{gridY}");
+                      $" - rounded to: {gridX}|{gridY} - target occupied = {targetOccupied}");
                 
             Entity gridBoxEntity = box.entity;
             NonUniformScale gridBoxScale = nonuniforms[gridBoxEntity];
