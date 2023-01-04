@@ -159,7 +159,7 @@ public partial struct PlayerDirectionJob : IJobEntity
             {
                 targetX = playerGridX;
                 targetY = playerGridY;
-                targetOccupied = true;
+                targetOccupied = true; // FIXME: this flag doesn't translate to the debug print, bug?
             }
 
             player.targetX = targetX;
