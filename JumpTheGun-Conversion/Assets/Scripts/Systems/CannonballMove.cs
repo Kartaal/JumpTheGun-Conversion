@@ -15,14 +15,14 @@ public partial class CannonballMove : SystemBase
     protected override void OnUpdate()
     {
         
-        float deltaTime = Time.DeltaTime;
-        var cannonballSpawnJob = new CannonballMoveJob
-        {
-            dt = deltaTime
-        };
-
-        var handle = cannonballSpawnJob.Schedule();
-        ecbSystem.AddJobHandleForProducer(handle);
+        // float deltaTime = Time.DeltaTime;
+        // var cannonballSpawnJob = new CannonballMoveJob
+        // {
+        //     dt = deltaTime
+        // };
+        //
+        // var handle = cannonballSpawnJob.Schedule();
+        // ecbSystem.AddJobHandleForProducer(handle);
     }
 }
 

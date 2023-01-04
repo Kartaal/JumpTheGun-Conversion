@@ -30,9 +30,8 @@ public partial class CannonballSpawningSystem : SystemBase
             dt = deltaTime
         };
 
-        cannonballSpawnJob.Run();
-
-        // ecbSystem.AddJobHandleForProducer(handle);
+        var handle = cannonballSpawnJob.Schedule();
+        ecbSystem.AddJobHandleForProducer(handle);
         // }
     }
 }

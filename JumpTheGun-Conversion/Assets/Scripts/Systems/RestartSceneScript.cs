@@ -1,8 +1,10 @@
-﻿using Unity.Burst;
+﻿using System;
+using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Scenes;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 [UpdateAfter(typeof(DestroyOnContact))]
 public partial class RestartSceneScript : SystemBase
@@ -25,39 +27,29 @@ public partial class RestartSceneScript : SystemBase
 
         var loadParameters = new SceneSystem.LoadParameters { Flags = SceneLoadFlags.DisableAutoLoad };
         var sceneEntity = m_SceneSystem.LoadSceneAsync(allocatedScenes[0].Guid, loadParameters);
-        //// m_SceneSystem.UnloadScene(sceneEntity);
 
         var ecb = ecbSystem.CreateCommandBuffer();
 
         var aimJob = new RestartSceneJob
         {
             ecb = ecb,
-            done = false
             // sceneSystem = m_SceneSystem,
             // requests = allocatedScenes,
         };
         var jobHandle = aimJob.Schedule();
         ecbSystem.AddJobHandleForProducer(jobHandle);
-        // //kill, then reload
-        // Debug.Log("EndMe");
-        // m_SceneSystem.UnloadScene(sceneEntity);
-        // Debug.Log("RevMe");
-        // m_SceneSystem.LoadSceneAsync(sceneEntity);
-        //// not working at the moment
-        // if (aimJob.done)
-        // {
-        //     Debug.Log("EndMe");
-        //     m_SceneSystem.UnloadScene(sceneEntity);
-        //     //// reloadscene
-        //     // EntityManager.DestroyEntity(m_NewRequests);
-        //     // m_NewRequests.Dispose();
-        //     // m_SceneSystem.UnloadScene(sceneEntity);
-        // }
 
+        var gameData = GetSingleton<GameData>();
 
-        // // var entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
-        // // entityManager.DestroyEntity(entityManager.UniversalQuery);
-        // // SceneManager.LoadScene(SceneManager.GetActiveScene().name, LoadSceneMode.Single);
+        if (gameData.gameOver)
+        {
+            Debug.Log("EndMe");
+            m_SceneSystem.UnloadScene(sceneEntity);
+            //// reloadscene
+            // EntityManager.DestroyEntity(m_NewRequests);
+            // m_NewRequests.Dispose();
+            // m_SceneSystem.UnloadScene(sceneEntity);
+        }
     }
 }
 
@@ -67,18 +59,10 @@ public partial struct RestartSceneJob : IJobEntity
 {
     public EntityCommandBuffer ecb;
 
-    public bool done;
-
     // [BurstDiscard]
-    private void Execute(Entity entity, ref Player player, ref Health health)
+    private void Execute(Entity entity, in Player player, ref GameData gameData)
     {
-        if (player.isDead && health.Value <= 5)
-        {
-            // sceneSystem.LoadSceneAsync(requests[0].Guid);
-            // done = true;
-            // Debug.Log("EndMe");
-            // ecb.DestroyEntity(entity);
-            // sceneSystem.UnloadScene(scene);
-        }
+        if (player.isDead)
+            gameData.gameOver = true;
     }
 }
