@@ -31,7 +31,7 @@ public partial class PlayerBounceSystem : SystemBase
 /**
  * Reads data from player's parabola-component and updates player translation
  */
-//[BurstCompile]
+[BurstCompile]
 //[WithAll(typeof(Player))]
 public partial struct PlayerBounceJob : IJobEntity
 {
@@ -42,10 +42,9 @@ public partial struct PlayerBounceJob : IJobEntity
             float y = parabola.a * parabola.t * parabola.t + 
                       parabola.b * parabola.t + parabola.c;
             
-            // FIXME: If player.target coords are invalid, jump to current position instead
-            float x = math.lerp(translation.Value.x, player.targetX, parabola.t);
-            float z = math.lerp(translation.Value.z, player.targetY, parabola.t);
-
+            float x = math.lerp(player.currentX, player.targetX, parabola.t);
+            float z = math.lerp(player.currentY, player.targetY, parabola.t);   
+            
             translation.Value = new float3(x, y, z);
         }
     }

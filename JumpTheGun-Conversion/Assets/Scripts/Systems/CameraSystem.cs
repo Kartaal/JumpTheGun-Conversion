@@ -32,6 +32,6 @@ public partial struct UpdateCameraJob : IJobEntity
 {
     public void Execute(in Translation translation)
     {
-        MonoCameraController.Instance.UpdateTargetPosition(translation.Value);
+        MonoCameraController.instance.UpdateCamTarget(translation.Value);
     }
 }

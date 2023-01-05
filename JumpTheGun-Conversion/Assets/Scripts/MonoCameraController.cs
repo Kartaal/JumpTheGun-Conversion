@@ -5,22 +5,24 @@ using UnityEngine;
 
 public class MonoCameraController : MonoBehaviour
 {
+    public static MonoCameraController instance;
     
-    public Vector3 offset;
-    Vector3 targetPosition;
-    public Camera mainCamera;
-
-    public static MonoCameraController Instance;
+    private Camera mainCamera;
+    private Vector3 targetPosition;
+    
+    [SerializeField] private Vector3 offset;
+    
     
     private void Awake()
     {
-        if (Instance != null)
+        if (instance != null)
         {
-            DestroyImmediate(gameObject);
+            //DestroyImmediate(gameObject);
+            Destroy(gameObject);
         }
         else
         {
-            Instance = this;
+            instance = this;
         }
     }
     
@@ -30,20 +32,16 @@ public class MonoCameraController : MonoBehaviour
         mainCamera.gameObject.transform.position = offset;
     }
     
-    void Update()
-    {
-        
-    }
-    
     private void LateUpdate()
     {
         mainCamera.gameObject.transform.position = targetPosition + offset;
     }
 
-    public void UpdateTargetPosition(float3 position)
+    // invoked from CameraSystem using static reference
+    public void UpdateCamTarget(float3 position)
     {
         targetPosition = position;
-        targetPosition.y = 0f;
+        targetPosition.y = 0f; // height of camera origin is locked to offset y-value
     }
     
 }

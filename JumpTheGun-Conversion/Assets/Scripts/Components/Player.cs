@@ -10,4 +10,5 @@ public struct Player : IComponentData
     public int targetY;
     public int currentX;
     public int currentY;
+    public bool isTargetOccupied;
 }

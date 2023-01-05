@@ -109,6 +109,8 @@ public partial struct PlayerDirectionJob : IJobEntity
 
         int playerGridX = (int)math.round(translation.Value.x);
         int playerGridY = (int)math.round(translation.Value.z);
+        player.currentX = playerGridX;
+        player.currentY = playerGridY;
 
         int targetX = gridX;
         int targetY = gridY;
@@ -154,17 +156,19 @@ public partial struct PlayerDirectionJob : IJobEntity
         // Avoid going outside the grid, col and row -1 because 0-indexed array
         if (targetX < 0 || targetX > col-1) targetX = playerGridX;
         if (targetY < 0 || targetY > row-1) targetY = playerGridY;
-        
 
+        int currentBoxIndex = col * playerGridX + playerGridY;
         int targetBoxIndex = col * targetX + targetY;
-        BoxesComponent box = boxes[targetBoxIndex];
-        if (box.occupied)
+        BoxesComponent targetBox = boxes[targetBoxIndex];
+        
+        if (targetBox.occupied)
         {
             targetX = playerGridX;
             targetY = playerGridY;
-            targetOccupied = true; // FIXME: this flag doesn't translate to the debug print, bug?
+            targetOccupied = true; // only used for debugging
         }
-
+        
+        player.isTargetOccupied = targetBox.occupied; // TODO: clean up redundant references
         player.targetX = targetX;
         player.targetY = targetY;
         
@@ -175,22 +179,35 @@ public partial struct PlayerDirectionJob : IJobEntity
         
         if (parabola.t >= 1.0f) // this check can be removed(?), see start of method-body
         {
-            Debug.Log($"new bounce from {translation.Value.x}|{translation.Value.z} to {hitPos.x}|{hitPos.z}" +
+            Debug.Log($"new bounce from {player.currentX}|{player.currentY} to {hitPos.x}|{hitPos.z}" +
                       $" - rounded to: {gridX}|{gridY} - target occupied = {targetOccupied}");
                 
-            Entity gridBoxEntity = box.entity;
-            NonUniformScale gridBoxScale = nonuniforms[gridBoxEntity];
-            float startY = gridBoxScale.Value.y; // + jump offset?
+            //Entity gridBoxEntity = targetBox.entity;
+            //NonUniformScale gridBoxScale = nonuniforms[gridBoxEntity];
+            //float startY = gridBoxScale.Value.y; // + jump offset?
 
-            BoxesComponent targetBox = boxes[targetBoxIndex];
-            Entity targetBoxEntity = targetBox.entity;
-            NonUniformScale targetBoxScale = nonuniforms[targetBoxEntity];
-            float endY = targetBoxScale.Value.y; // + jump offset?
+            // access start height:
+            //BoxesComponent currentBox = boxes[currentBoxIndex];
+            //Entity currentBoxEntity = currentBox.entity;
+            NonUniformScale currentBoxScale = nonuniforms[boxes[currentBoxIndex].entity];
+            float startY = currentBoxScale.Value.y;
+            float endY;
+            
+            if (targetBox.occupied)
+            {
+                endY = startY; // fixed bounce height to bounce in place when target occupied
+            } else {
+                // access end height:
+                //BoxesComponent targetBoxComp = boxes[targetBoxIndex];
+                //Entity targetBoxEntity = targetBoxComp.entity;
+                NonUniformScale targetBoxScale = nonuniforms[boxes[targetBoxIndex].entity];
+                endY = targetBoxScale.Value.y;    
+            }
 
             float height = math.max(startY, endY);
             height += parabola.BOUNCE_HEIGHT;
             
-            // calculate new parabola! (overwrites data in parabola component)
+            // calculate new parabola! (overwrites data in player's parabola component)
             parabola.c = startY;
 
             float k = math.sqrt(math.abs(startY - height)) /
