@@ -17,8 +17,6 @@ public partial class CameraSystem : SystemBase
 
     protected override void OnUpdate()
     {
-        //new UpdateCameraJob().Run();
-
         var updateCamJob = new UpdateCameraJob();
         var handle = updateCamJob.Schedule();
         ecbSystem.AddJobHandleForProducer(handle);

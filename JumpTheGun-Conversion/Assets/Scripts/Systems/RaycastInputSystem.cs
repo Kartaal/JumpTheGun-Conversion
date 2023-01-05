@@ -104,16 +104,16 @@ public partial struct PlayerDirectionJob : IJobEntity
         if (parabola.t < 1f) return; // discard player input if mid-bounce
         
         // Find closest box coords in hitPos direction
-        int gridX = (int)math.round(hitPos.x);
-        int gridY = (int)math.round(hitPos.z);
+        int mouseGridX = (int)math.round(hitPos.x);
+        int mouseGridY = (int)math.round(hitPos.z);
 
         int playerGridX = (int)math.round(translation.Value.x);
         int playerGridY = (int)math.round(translation.Value.z);
         player.currentX = playerGridX;
         player.currentY = playerGridY;
 
-        int targetX = gridX;
-        int targetY = gridY;
+        int targetX = mouseGridX;
+        int targetY = mouseGridY;
 
         // int targetBoxIndex = col * targetX + targetY;
         // //BoxesComponent box = boxes[targetBoxIndex]; // FIXME: sanitize this?
@@ -137,19 +137,19 @@ public partial struct PlayerDirectionJob : IJobEntity
         // Debug.Log($"Y offset: {math.abs(gridY - playerGridY)}");
         // Debug.Log("");
         
-        if (math.abs(gridX - playerGridX) > 1 || math.abs(gridY - playerGridY) > 1)
+        if (math.abs(mouseGridX - playerGridX) > 1 || math.abs(mouseGridY - playerGridY) > 1)
         {
             targetX = playerGridX;
             targetY = playerGridY;
 
             // increments single step target position towards mouse position
-            if (gridX != playerGridX)
+            if (mouseGridX != playerGridX)
             {
-                targetX += gridX > playerGridX ? 1 : -1;
+                targetX += mouseGridX > playerGridX ? 1 : -1;
             }
-            if (gridY != playerGridY)
+            if (mouseGridY != playerGridY)
             {
-                targetY += gridY > playerGridY ? 1 : -1;
+                targetY += mouseGridY > playerGridY ? 1 : -1;
             }
         }
 
@@ -180,26 +180,18 @@ public partial struct PlayerDirectionJob : IJobEntity
         if (parabola.t >= 1.0f) // this check can be removed(?), see start of method-body
         {
             Debug.Log($"new bounce from {player.currentX}|{player.currentY} to {hitPos.x}|{hitPos.z}" +
-                      $" - rounded to: {gridX}|{gridY} - target occupied = {targetOccupied}");
+                      $" - rounded to: {mouseGridX}|{mouseGridY} - target occupied = {targetOccupied}");
                 
-            //Entity gridBoxEntity = targetBox.entity;
-            //NonUniformScale gridBoxScale = nonuniforms[gridBoxEntity];
-            //float startY = gridBoxScale.Value.y; // + jump offset?
-
             // access start height:
-            //BoxesComponent currentBox = boxes[currentBoxIndex];
-            //Entity currentBoxEntity = currentBox.entity;
             NonUniformScale currentBoxScale = nonuniforms[boxes[currentBoxIndex].entity];
             float startY = currentBoxScale.Value.y;
             float endY;
             
             if (targetBox.occupied)
             {
-                endY = startY; // fixed bounce height to bounce in place when target occupied
+                endY = startY; // fixed bounce height with bouncing in place when target occupied
             } else {
                 // access end height:
-                //BoxesComponent targetBoxComp = boxes[targetBoxIndex];
-                //Entity targetBoxEntity = targetBoxComp.entity;
                 NonUniformScale targetBoxScale = nonuniforms[boxes[targetBoxIndex].entity];
                 endY = targetBoxScale.Value.y;    
             }

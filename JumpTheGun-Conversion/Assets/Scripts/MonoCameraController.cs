@@ -17,7 +17,6 @@ public class MonoCameraController : MonoBehaviour
     {
         if (instance != null)
         {
-            //DestroyImmediate(gameObject);
             Destroy(gameObject);
         }
         else
