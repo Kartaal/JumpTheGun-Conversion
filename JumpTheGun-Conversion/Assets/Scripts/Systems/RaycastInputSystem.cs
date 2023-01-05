@@ -14,7 +14,7 @@ public partial class RaycastInputSystem : SystemBase
     public CollisionWorld _collisionWorld;
 
     public GameData _gameData;
-    
+
     protected override void OnCreate()
     {
         ecbSystem = World.GetOrCreateSystem<BeginSimulationEntityCommandBufferSystem>();
@@ -27,17 +27,17 @@ public partial class RaycastInputSystem : SystemBase
         if (_gameData.Equals(null))
         {
             _gameData = GetSingleton<GameData>(); // OBS: this approach is currently not working or active
-        } 
+        }
     }
 
     protected override void OnUpdate()
     {
         float dt = Time.DeltaTime;
-        
+
         // Debugging things...
-        if(Input.GetKey(KeyCode.A))
+        if (Input.GetKey(KeyCode.A))
             Debug.Break();
-        
+
         RaycastInput raycastInput = new RaycastInput();
         RaycastHit raycastHit;
 
@@ -55,8 +55,8 @@ public partial class RaycastInputSystem : SystemBase
                 End = rayEnd,
                 Filter = new CollisionFilter
                 {
-                    BelongsTo = (uint) 0xffffffff,
-                    CollidesWith = (uint) PhysicsLayerEnum.Floor
+                    BelongsTo = (uint)0xffffffff,
+                    CollidesWith = (uint)PhysicsLayerEnum.Floor
                 }
             };
             raycastHit = new RaycastHit();
@@ -73,7 +73,7 @@ public partial class RaycastInputSystem : SystemBase
             {
                 hitPos = hitPos,
                 col = gameData.width,
-                row = gameData.height,
+                row = (int)gameData.height,
                 boxes = GetBuffer<BoxesComponent>(gameData.manager),
                 nonuniforms = nonuniforms,
                 // frames = UnityEngine.Time.frameCount,
@@ -93,6 +93,7 @@ public partial struct PlayerDirectionJob : IJobEntity
     public int col;
     public int row;
     public ComponentDataFromEntity<NonUniformScale> nonuniforms;
+
     public DynamicBuffer<BoxesComponent> boxes;
     // public int frames;
 
@@ -102,7 +103,7 @@ public partial struct PlayerDirectionJob : IJobEntity
     {
         parabola.t += dt;
         if (parabola.t < 1f) return; // discard player input if mid-bounce
-        
+
         // Find closest box coords in hitPos direction
         int mouseGridX = (int)math.round(hitPos.x);
         int mouseGridY = (int)math.round(hitPos.z);
@@ -136,7 +137,7 @@ public partial struct PlayerDirectionJob : IJobEntity
         // Debug.Log($"X offset: {math.abs(gridX - playerGridX)}");
         // Debug.Log($"Y offset: {math.abs(gridY - playerGridY)}");
         // Debug.Log("");
-        
+
         if (math.abs(mouseGridX - playerGridX) > 1 || math.abs(mouseGridY - playerGridY) > 1)
         {
             targetX = playerGridX;
@@ -147,6 +148,7 @@ public partial struct PlayerDirectionJob : IJobEntity
             {
                 targetX += mouseGridX > playerGridX ? 1 : -1;
             }
+
             if (mouseGridY != playerGridY)
             {
                 targetY += mouseGridY > playerGridY ? 1 : -1;
@@ -154,51 +156,54 @@ public partial struct PlayerDirectionJob : IJobEntity
         }
 
         // Avoid going outside the grid, col and row -1 because 0-indexed array
-        if (targetX < 0 || targetX > col-1) targetX = playerGridX;
-        if (targetY < 0 || targetY > row-1) targetY = playerGridY;
+        if (targetX < 0 || targetX > col - 1) targetX = playerGridX;
+        if (targetY < 0 || targetY > row - 1) targetY = playerGridY;
 
         int currentBoxIndex = col * playerGridX + playerGridY;
         int targetBoxIndex = col * targetX + targetY;
         BoxesComponent targetBox = boxes[targetBoxIndex];
-        
+
         if (targetBox.occupied)
         {
             targetX = playerGridX;
             targetY = playerGridY;
             targetOccupied = true; // only used for debugging
         }
-        
+
         player.isTargetOccupied = targetBox.occupied; // TODO: clean up redundant references
         player.targetX = targetX;
         player.targetY = targetY;
-        
-        
+
+
         // create/overwrite parabola...
         // t > 1 means bounce is complete (IDLE)
         // 0 < t < 1 means bounce is ongoing (BOUNCING)
-        
+
         if (parabola.t >= 1.0f) // this check can be removed(?), see start of method-body
         {
-            Debug.Log($"new bounce from {player.currentX}|{player.currentY} to {hitPos.x}|{hitPos.z}" +
-                      $" - rounded to: {mouseGridX}|{mouseGridY} - target occupied = {targetOccupied}");
-                
+            //// Commented due to a lot of console answers while debugging
+            // Debug.Log($"new bounce from {player.currentX}|{player.currentY} to {hitPos.x}|{hitPos.z}" +
+            //           $" - rounded to: {mouseGridX}|{mouseGridY} - target occupied = {targetOccupied}");
+
             // access start height:
             NonUniformScale currentBoxScale = nonuniforms[boxes[currentBoxIndex].entity];
             float startY = currentBoxScale.Value.y;
             float endY;
-            
+
             if (targetBox.occupied)
             {
                 endY = startY; // fixed bounce height with bouncing in place when target occupied
-            } else {
+            }
+            else
+            {
                 // access end height:
                 NonUniformScale targetBoxScale = nonuniforms[boxes[targetBoxIndex].entity];
-                endY = targetBoxScale.Value.y;    
+                endY = targetBoxScale.Value.y;
             }
 
             float height = math.max(startY, endY);
             height += parabola.BOUNCE_HEIGHT;
-            
+
             // calculate new parabola! (overwrites data in player's parabola component)
             parabola.c = startY;
 
@@ -209,8 +214,6 @@ public partial struct PlayerDirectionJob : IJobEntity
             parabola.a = (height - startY - k * (endY - startY)) / (k * k - k);
             parabola.b = endY - startY - parabola.a;
             parabola.t = 0f; // reset t to start new parabola movement
-        } 
+        }
     }
 }
-
-

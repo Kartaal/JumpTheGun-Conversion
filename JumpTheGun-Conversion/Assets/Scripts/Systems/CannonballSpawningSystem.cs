@@ -5,7 +5,7 @@ using Unity.Jobs;
 using Unity.Mathematics;
 using Unity.Transforms;
 
-[UpdateAfter(typeof(TankAiming))]
+[UpdateAfter(typeof(SpawnTerrainSystem))]
 public partial class CannonballSpawningSystem : SystemBase
 {
     public BeginSimulationEntityCommandBufferSystem ecbSystem;
@@ -18,7 +18,7 @@ public partial class CannonballSpawningSystem : SystemBase
     protected override void OnUpdate()
     {
         float deltaTime = Time.DeltaTime;
-        
+
         Entity cannonballPrefab = GetSingleton<CannonballPrefab>().entity;
 
         var cannonballSpawnJob = new CannonballSpawnJob
@@ -29,7 +29,6 @@ public partial class CannonballSpawningSystem : SystemBase
         };
 
         var handle = cannonballSpawnJob.Schedule();
-
         ecbSystem.AddJobHandleForProducer(handle);
     }
 }
@@ -56,6 +55,18 @@ public partial struct CannonballSpawnJob : IJobEntity
             {
                 Value = translation.Value
             });
+            
+            int tankGridX = (int)math.round(translation.Value.x);
+            int tankGridY = (int)math.round(translation.Value.z);
+            ecb.SetComponent(cannonball, new CannonballData
+            {
+                entity = cannonball,
+                timeLeft = 5,
+                speed = 5,
+                currentX = tankGridX,
+                currentY = tankGridY,
+            });
+
         }
     }
 }

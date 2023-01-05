@@ -10,8 +10,10 @@ public struct GameData : IComponentData
     public float minHeight;
     public float maxHeight;
 
-    public int height;
+    public float height;
     public int width;
 
     public float raycastDistance;
+    public float boxHeightDamage;
+    public bool gameOver;
 }

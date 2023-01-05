@@ -6,4 +6,7 @@ public struct CannonballData : IComponentData
     public Entity entity;
     public float timeLeft;
     public float speed;
+    
+    public int currentX;
+    public int currentY;
 }
