@@ -19,13 +19,15 @@ public partial class CannonballBounceSystem : SystemBase
 
     protected override void OnUpdate()
     {
-        var player = GetSingleton<Player>();
+        float dt = Time.DeltaTime;
+        //var player = GetSingleton<Player>();
 
-        var playerBounceJob = new CannonballBounceJob
+        var cannonballBounceJob = new CannonballBounceJob
         {
+            dt = dt
         };
 
-        var handle = playerBounceJob.Schedule();
+        var handle = cannonballBounceJob.Schedule();
         ecbSystem.AddJobHandleForProducer(handle);
     }
 }
@@ -35,8 +37,12 @@ public partial class CannonballBounceSystem : SystemBase
  */
 public partial struct CannonballBounceJob : IJobEntity
 {
-    public void Execute(in CannonballData cannonball, in ParabolaComp parabola, ref Translation translation)
+    public float dt;
+    
+    public void Execute(in CannonballData cannonball, ref ParabolaComp parabola, ref Translation translation)
     {
+        parabola.t += dt;
+        
         if (parabola.t <= 1f)
         {
             float y = parabola.a * parabola.t * parabola.t + parabola.b * parabola.t + parabola.c;

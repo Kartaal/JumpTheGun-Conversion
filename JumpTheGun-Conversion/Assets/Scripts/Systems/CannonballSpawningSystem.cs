@@ -19,7 +19,10 @@ public partial class CannonballSpawningSystem : SystemBase
     protected override void OnUpdate()
     {
         float deltaTime = Time.DeltaTime;
-
+        
+        var gameData = GetSingleton<GameData>();
+        var nonUniforms = GetComponentDataFromEntity<NonUniformScale>();
+        
         Entity cannonballPrefab = GetSingleton<CannonballPrefab>().entity;
         var player = GetSingleton<Player>();
 
@@ -27,9 +30,13 @@ public partial class CannonballSpawningSystem : SystemBase
         {
             ecb = ecbSystem.CreateCommandBuffer(),
             prefab = cannonballPrefab,
-            playerTargetX = player.targetX,
-            playerTargetY = player.targetY,
-            dt = deltaTime
+            playerPosX = player.currentX,
+            playerPosY = player.currentY,
+            dt = deltaTime,
+            col = gameData.width,
+            row = (int)gameData.height,
+            boxes = GetBuffer<BoxesComponent>(gameData.manager),
+            nonUniforms = nonUniforms,
         };
 
         var handle = cannonballSpawnJob.Schedule();
@@ -44,8 +51,13 @@ public partial struct CannonballSpawnJob : IJobEntity
     public EntityCommandBuffer ecb;
     public Entity prefab;
     public float dt;
-    public int playerTargetX;
-    public int playerTargetY;
+    public int playerPosX;
+    public int playerPosY;
+    
+    public int col;
+    public int row;
+    public ComponentDataFromEntity<NonUniformScale> nonUniforms;
+    public DynamicBuffer<BoxesComponent> boxes;
 
     private void Execute(in Translation translation, ref Tank spawnPoint)
     {
@@ -71,8 +83,38 @@ public partial struct CannonballSpawnJob : IJobEntity
                 speed = 5,
                 startX = tankGridX,
                 startY = tankGridY,
-                targetX = playerTargetX,
-                targetY = playerTargetY,
+                targetX = playerPosX,
+                targetY = playerPosY,
+            });
+            
+            int currentBoxIndex = col * tankGridX + tankGridY; // from
+            int targetBoxIndex = col * playerPosX + playerPosY; // to
+            
+            NonUniformScale currentBoxScale = nonUniforms[boxes[currentBoxIndex].entity];
+            float startY = currentBoxScale.Value.y;
+            
+            NonUniformScale targetBoxScale = nonUniforms[boxes[targetBoxIndex].entity];
+            float endY = targetBoxScale.Value.y;
+            
+            float height = math.max(startY, endY);
+            height += 5f;
+            
+            float c = startY;
+            
+            float k = math.sqrt(math.abs(startY - height)) /
+                      (math.sqrt(math.abs(startY - height)) +
+                       math.sqrt(math.abs(endY - height)));
+            
+            float a = (height - startY - k * (endY - startY)) / (k * k - k);
+            float b = endY - startY - a;
+            float t = 0f; // reset t to start new parabola movement
+            
+            ecb.SetComponent(cannonball, new ParabolaComp
+            {
+                c = c,
+                a = a,
+                b = b,
+                t = t
             });
             
             
