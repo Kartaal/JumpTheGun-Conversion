@@ -4,6 +4,7 @@ using Unity.Collections;
 using Unity.Entities;
 using Unity.Scenes;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using Random = UnityEngine.Random;
 
 [UpdateAfter(typeof(DestroyOnContact))]
@@ -19,6 +20,7 @@ public partial class RestartSceneScript : SystemBase
         ecbSystem = World.GetOrCreateSystem<BeginSimulationEntityCommandBufferSystem>();
         m_SceneSystem = World.GetExistingSystem<SceneSystem>();
         m_NewRequests = GetEntityQuery(typeof(SceneLoader));
+        RequireSingletonForUpdate<Player>();
     }
 
     protected override void OnUpdate()
@@ -36,11 +38,25 @@ public partial class RestartSceneScript : SystemBase
             // sceneSystem = m_SceneSystem,
             // requests = allocatedScenes,
         };
-        var jobHandle = aimJob.Schedule();
-        ecbSystem.AddJobHandleForProducer(jobHandle);
+        //var jobHandle = aimJob.Schedule();
+        //ecbSystem.AddJobHandleForProducer(jobHandle);
 
-        var gameData = GetSingleton<GameData>();
+        //var gameData = GetSingleton<GameData>();
+        var playerEntity = GetSingleton<Player>();
+        if (playerEntity.isDead)
+        {
+            Debug.Log("GAME OVER WILL RESTART");
+            
+            //var entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
+            //entityManager.DestroyEntity(entityManager.UniversalQuery);
+            
+            m_SceneSystem.UnloadScene(sceneEntity);
+            
+            //SceneManager.LoadScene(SceneManager.GetActiveScene().name, LoadSceneMode.Single);
+            //SceneManager.LoadScene(2);
+        }
 
+        /*
         if (gameData.gameOver)
         {
             Debug.Log("EndMe");
@@ -50,11 +66,12 @@ public partial class RestartSceneScript : SystemBase
             // m_NewRequests.Dispose();
             // m_SceneSystem.UnloadScene(sceneEntity);
         }
+        */
     }
 }
 
 
-[BurstCompile]
+//[BurstCompile]
 public partial struct RestartSceneJob : IJobEntity
 {
     public EntityCommandBuffer ecb;

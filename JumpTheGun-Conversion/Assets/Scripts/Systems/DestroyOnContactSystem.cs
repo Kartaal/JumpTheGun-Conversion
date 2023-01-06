@@ -19,7 +19,7 @@ public partial class DestroyOnContactSystem : SystemBase
         var aimJob = new DestroyPlayerOnLowHealthJob
         {
             ecb = ecb,
-            player = GetComponentDataFromEntity<Player>(true),
+            //player = GetComponentDataFromEntity<Player>(true),
         };
 
         var jobHandle = aimJob.Schedule();
@@ -33,10 +33,17 @@ public partial class DestroyOnContactSystem : SystemBase
 public partial struct DestroyPlayerOnLowHealthJob : IJobEntity
 {
     public EntityCommandBuffer ecb;
-    [ReadOnly] public ComponentDataFromEntity<Player> player;
+    //[ReadOnly] public ComponentDataFromEntity<Player> player;
 
-    private void Execute(Entity entity, ref Health health)
+    private void Execute(in Player player)
     {
+
+        if (player.isDead)
+        {
+            // Invoke reload sequence
+        }
+        
+        /*
         if (health.Value > 0) return;
         
         if (player.HasComponent(entity))
@@ -51,5 +58,6 @@ public partial struct DestroyPlayerOnLowHealthJob : IJobEntity
         }
         else
             ecb.DestroyEntity(entity);
+        */
     }
 }

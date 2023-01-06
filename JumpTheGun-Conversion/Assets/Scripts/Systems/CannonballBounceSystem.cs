@@ -41,7 +41,7 @@ public partial struct CannonballBounceJob : IJobEntity
     
     public void Execute(in CannonballData cannonball, ref ParabolaComp parabola, ref Translation translation)
     {
-        parabola.t += dt;
+        parabola.t += (dt * 0.7f); // FIXME: Hack to reduce cannonball speed
         
         if (parabola.t <= 1f)
         {

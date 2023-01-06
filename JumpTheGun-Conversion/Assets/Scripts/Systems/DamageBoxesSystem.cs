@@ -5,6 +5,7 @@ using Unity.Mathematics;
 using Unity.Physics;
 using Unity.Physics.Systems;
 using Unity.Transforms;
+using UnityEngine;
 
 public partial class DamageBoxesSystem : SystemBase
 {
@@ -38,6 +39,8 @@ public partial class DamageBoxesSystem : SystemBase
             allAffectedTag = GetComponentDataFromEntity<TriggerAffectedTag>(true),
             damageable = GetComponentDataFromEntity<DamageableTag>(true),
             currentHp = GetComponentDataFromEntity<Health>(true),
+            player = GetComponentDataFromEntity<Player>(true),
+            cannonball = GetComponentDataFromEntity<CannonballData>(true),
             ecb = ecb
         }.Schedule(stepPhysicsWorld.Simulation, Dependency);
 
@@ -55,6 +58,8 @@ public partial struct DamageCollisionJob : ITriggerEventsJob
     [ReadOnly] public ComponentDataFromEntity<TriggerAffectedTag> allAffectedTag;
     [ReadOnly] public ComponentDataFromEntity<DamageableTag> damageable;
     [ReadOnly] public ComponentDataFromEntity<Health> currentHp;
+    [ReadOnly] public ComponentDataFromEntity<Player> player;
+    [ReadOnly] public ComponentDataFromEntity<CannonballData> cannonball;
 
     public EntityCommandBuffer ecb;
 
@@ -63,6 +68,22 @@ public partial struct DamageCollisionJob : ITriggerEventsJob
         Entity entityA = triggerEvent.EntityA;
         Entity entityB = triggerEvent.EntityB;
 
+        if (player.HasComponent(entityA) && cannonball.HasComponent(entityB))
+        {
+            //ecb.SetComponent(entityA, player);
+            var playerData = player[entityA];
+            playerData.isDead = true;
+            ecb.SetComponent(entityA, playerData);
+            //Debug.Log("PLAYER SUCCESSFULLY KILLED AS entityA");
+        } 
+        else if (player.HasComponent(entityB) && cannonball.HasComponent(entityA))
+        {
+            var playerData = player[entityB];
+            playerData.isDead = true;
+            ecb.SetComponent(entityB, playerData);
+            //Debug.Log("PLAYER SUCCESSFULLY KILLED AS entityB");
+        }
+        
         if (damageable.HasComponent(entityA) && allAffectedTag.HasComponent(entityB))
         {
             if (currentHp.HasComponent(entityA))
@@ -74,6 +95,8 @@ public partial struct DamageCollisionJob : ITriggerEventsJob
                 });
                 ecb.DestroyEntity(entityB);
             }
+            
+            
         }
         else if (damageable.HasComponent(entityB) && allAffectedTag.HasComponent(entityA))
         {
