@@ -7,6 +7,8 @@ public struct CannonballData : IComponentData
     public float timeLeft;
     public float speed;
     
-    public int currentX;
-    public int currentY;
+    public int startX;
+    public int startY;
+    public int targetX;
+    public int targetY;
 }

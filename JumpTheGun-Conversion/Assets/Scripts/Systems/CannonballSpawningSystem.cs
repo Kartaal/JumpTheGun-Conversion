@@ -13,6 +13,7 @@ public partial class CannonballSpawningSystem : SystemBase
     protected override void OnCreate()
     {
         ecbSystem = World.GetOrCreateSystem<BeginSimulationEntityCommandBufferSystem>();
+        RequireSingletonForUpdate<Player>();
     }
 
     protected override void OnUpdate()
@@ -20,11 +21,14 @@ public partial class CannonballSpawningSystem : SystemBase
         float deltaTime = Time.DeltaTime;
 
         Entity cannonballPrefab = GetSingleton<CannonballPrefab>().entity;
+        var player = GetSingleton<Player>();
 
         var cannonballSpawnJob = new CannonballSpawnJob
         {
             ecb = ecbSystem.CreateCommandBuffer(),
             prefab = cannonballPrefab,
+            playerTargetX = player.targetX,
+            playerTargetY = player.targetY,
             dt = deltaTime
         };
 
@@ -40,6 +44,8 @@ public partial struct CannonballSpawnJob : IJobEntity
     public EntityCommandBuffer ecb;
     public Entity prefab;
     public float dt;
+    public int playerTargetX;
+    public int playerTargetY;
 
     private void Execute(in Translation translation, ref Tank spawnPoint)
     {
@@ -55,7 +61,7 @@ public partial struct CannonballSpawnJob : IJobEntity
             {
                 Value = translation.Value
             });
-            
+
             int tankGridX = (int)math.round(translation.Value.x);
             int tankGridY = (int)math.round(translation.Value.z);
             ecb.SetComponent(cannonball, new CannonballData
@@ -63,10 +69,13 @@ public partial struct CannonballSpawnJob : IJobEntity
                 entity = cannonball,
                 timeLeft = 5,
                 speed = 5,
-                currentX = tankGridX,
-                currentY = tankGridY,
+                startX = tankGridX,
+                startY = tankGridY,
+                targetX = playerTargetX,
+                targetY = playerTargetY,
             });
-
+            
+            
         }
     }
 }
