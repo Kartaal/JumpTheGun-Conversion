@@ -81,7 +81,7 @@ public partial struct SpawnBoxJob : IJobEntity
                 // height scaling
                 height = random.NextFloat(gameData.minHeight, gameData.maxHeight);
                 ////to prove dmg works, can check with same height
-                height = 5;
+                //height = 5;
                 ecb.AddComponent(boxEntity, new NonUniformScale
                 {
                     Value = new float3(1, height, 1)
