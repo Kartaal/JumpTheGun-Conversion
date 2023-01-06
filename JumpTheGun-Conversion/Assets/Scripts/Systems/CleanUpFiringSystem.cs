@@ -1,7 +1,7 @@
 ﻿using Unity.Burst;
 using Unity.Entities;
 
-[UpdateAfter(typeof(CannonballMove))]
+
 [UpdateAfter(typeof(CannonballSpawningSystem))]
 public partial class CleanUpFiringSystem : SystemBase
 {
