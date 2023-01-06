@@ -59,6 +59,8 @@ public partial struct CannonballSpawnJob : IJobEntity
     public ComponentDataFromEntity<NonUniformScale> nonUniforms;
     public DynamicBuffer<BoxesComponent> boxes;
 
+    private Random random;
+
     private void Execute(in Translation translation, ref Tank spawnPoint)
     {
         //Figure out why there is a delay before the first spawn
@@ -68,6 +70,11 @@ public partial struct CannonballSpawnJob : IJobEntity
         {
             Entity cannonball = ecb.Instantiate(prefab);
             spawnPoint.secondsBetweenSpawns = 0;
+            //spawnPoint.secondsToNextSpawn = UnityEngine.Random.Range(spawnPoint.secondsToNextSpawn-1f
+            //    , spawnPoint.secondsToNextSpawn+1f);
+            random = new Random(1232154);
+            var r = random.NextFloat(spawnPoint.secondsToNextSpawn - 1f, spawnPoint.secondsToNextSpawn + 1f);
+            spawnPoint.secondsToNextSpawn = r;
 
             ecb.SetComponent(cannonball, new Translation
             {
