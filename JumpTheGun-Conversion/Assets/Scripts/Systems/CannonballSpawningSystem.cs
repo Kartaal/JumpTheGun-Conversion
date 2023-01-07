@@ -21,7 +21,7 @@ public partial class CannonballSpawningSystem : SystemBase
         float deltaTime = Time.DeltaTime;
         
         var gameData = GetSingleton<GameData>();
-        var nonUniforms = GetComponentDataFromEntity<NonUniformScale>();
+        var nonUniforms = GetComponentDataFromEntity<NonUniformScale>(true);
         
         Entity cannonballPrefab = GetSingleton<CannonballPrefab>().entity;
         var player = GetSingleton<Player>();
@@ -34,7 +34,7 @@ public partial class CannonballSpawningSystem : SystemBase
             playerPosY = player.currentY,
             dt = deltaTime,
             col = gameData.width,
-            row = (int)gameData.height,
+            // row = (int)gameData.height,
             boxes = GetBuffer<BoxesComponent>(gameData.manager),
             nonUniforms = nonUniforms,
         };
@@ -49,15 +49,15 @@ public partial class CannonballSpawningSystem : SystemBase
 public partial struct CannonballSpawnJob : IJobEntity
 {
     public EntityCommandBuffer ecb;
-    public Entity prefab;
-    public float dt;
-    public int playerPosX;
-    public int playerPosY;
+    [ReadOnly] public Entity prefab;
+    [ReadOnly] public float dt;
+    [ReadOnly] public int playerPosX;
+    [ReadOnly] public int playerPosY;
     
     public int col;
-    public int row;
-    public ComponentDataFromEntity<NonUniformScale> nonUniforms;
-    public DynamicBuffer<BoxesComponent> boxes;
+    // public int row;
+    [ReadOnly] public ComponentDataFromEntity<NonUniformScale> nonUniforms;
+    [ReadOnly] public DynamicBuffer<BoxesComponent> boxes;
 
     private Random random;
 
@@ -72,7 +72,7 @@ public partial struct CannonballSpawnJob : IJobEntity
             spawnPoint.secondsBetweenSpawns = 0;
             //spawnPoint.secondsToNextSpawn = UnityEngine.Random.Range(spawnPoint.secondsToNextSpawn-1f
             //    , spawnPoint.secondsToNextSpawn+1f);
-            random = new Random((uint)spawnPoint.entity.Index);
+            random = new Random((uint) spawnPoint.entity.Index);
             var r = random.NextFloat(3f, 6f);
             spawnPoint.secondsToNextSpawn = r;
 
@@ -83,6 +83,7 @@ public partial struct CannonballSpawnJob : IJobEntity
 
             int tankGridX = (int)math.round(translation.Value.x);
             int tankGridY = (int)math.round(translation.Value.z);
+            
             ecb.SetComponent(cannonball, new CannonballData
             {
                 entity = cannonball,

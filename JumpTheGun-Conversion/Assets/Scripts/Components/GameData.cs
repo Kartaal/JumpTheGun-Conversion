@@ -13,7 +13,6 @@ public struct GameData : IComponentData
     public float height;
     public int width;
 
-    public float raycastDistance;
     public float boxHeightDamage;
-    public bool gameOver;
+    // public bool gameOver;
 }

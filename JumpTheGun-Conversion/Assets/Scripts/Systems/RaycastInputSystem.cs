@@ -4,6 +4,7 @@ using Unity.Mathematics;
 using Unity.Physics;
 using Unity.Physics.Systems;
 using Unity.Transforms;
+using Unity.Collections;
 using UnityEngine;
 using RaycastHit = Unity.Physics.RaycastHit;
 
@@ -14,7 +15,7 @@ public partial class RaycastInputSystem : SystemBase
     public BuildPhysicsWorld _physicsWorld;
     public CollisionWorld _collisionWorld;
 
-    public GameData _gameData;
+    // public GameData _gameData;
 
     protected override void OnCreate()
     {
@@ -23,21 +24,21 @@ public partial class RaycastInputSystem : SystemBase
         RequireSingletonForUpdate<Player>();
     }
 
-    protected override void OnStartRunning()
-    {
-        if (_gameData.Equals(null))
-        {
-            _gameData = GetSingleton<GameData>(); // OBS: this approach is currently not working or active
-        }
-    }
+    // protected override void OnStartRunning()
+    // {
+    //     if (_gameData.Equals(null))
+    //     {
+    //         _gameData = GetSingleton<GameData>(); // OBS: this approach is currently not working or active
+    //     }
+    // }
 
     protected override void OnUpdate()
     {
         float dt = Time.DeltaTime;
 
         // Debugging things...
-        if (Input.GetKey(KeyCode.A))
-            Debug.Break();
+        // if (Input.GetKey(KeyCode.A))
+        //     Debug.Break();
 
         RaycastInput raycastInput = new RaycastInput();
         RaycastHit raycastHit;
@@ -48,7 +49,6 @@ public partial class RaycastInputSystem : SystemBase
             var ray = Camera.main.ScreenPointToRay(Input.mousePosition);
             var rayOrigin = ray.origin;
             var rayEnd = ray.GetPoint(30f);
-            //var rayEnd = ray.GetPoint(_gameData.raycastDistance);
 
             raycastInput = new RaycastInput
             {
@@ -56,8 +56,8 @@ public partial class RaycastInputSystem : SystemBase
                 End = rayEnd,
                 Filter = new CollisionFilter
                 {
-                    BelongsTo = (uint)0xffffffff,
-                    CollidesWith = (uint)PhysicsLayerEnum.Floor
+                    BelongsTo = (uint) 0xffffffff,
+                    CollidesWith = (uint) PhysicsLayerEnum.Floor
                 }
             };
             raycastHit = new RaycastHit();
@@ -67,7 +67,7 @@ public partial class RaycastInputSystem : SystemBase
         {
             float3 hitPos = raycastHit.Position;
             var gameData = GetSingleton<GameData>();
-            var nonuniforms = GetComponentDataFromEntity<NonUniformScale>();
+            var nonuniforms = GetComponentDataFromEntity<NonUniformScale>(true);
 
             // Schedule player direction job
             var playerDirJob = new PlayerDirectionJob
@@ -75,7 +75,7 @@ public partial class RaycastInputSystem : SystemBase
                 hitPos = hitPos,
                 col = gameData.width,
                 row = (int)gameData.height,
-                boxes = GetBuffer<BoxesComponent>(gameData.manager),
+                boxes = GetBuffer<BoxesComponent>(gameData.manager, true),
                 nonuniforms = nonuniforms,
                 // frames = UnityEngine.Time.frameCount,
                 dt = dt
@@ -90,15 +90,15 @@ public partial class RaycastInputSystem : SystemBase
 [BurstCompile]
 public partial struct PlayerDirectionJob : IJobEntity
 {
-    public float3 hitPos;
-    public int col;
-    public int row;
-    public ComponentDataFromEntity<NonUniformScale> nonuniforms;
+    [ReadOnly] public float3 hitPos;
+    [ReadOnly] public int col;
+    [ReadOnly] public int row;
+    [ReadOnly] public ComponentDataFromEntity<NonUniformScale> nonuniforms;
 
-    public DynamicBuffer<BoxesComponent> boxes;
+    [ReadOnly] public DynamicBuffer<BoxesComponent> boxes;
     // public int frames;
 
-    public float dt;
+    [ReadOnly] public float dt;
 
     public void Execute(ref Player player, ref ParabolaComp parabola, in Translation translation)
     {
@@ -116,28 +116,6 @@ public partial struct PlayerDirectionJob : IJobEntity
 
         int targetX = mouseGridX;
         int targetY = mouseGridY;
-
-        // int targetBoxIndex = col * targetX + targetY;
-        // //BoxesComponent box = boxes[targetBoxIndex]; // FIXME: sanitize this?
-        // BoxesComponent box;
-        // try
-        // {
-        //     box = boxes[targetBoxIndex];
-        // }
-        // catch (Exception e)
-        // {
-        //     Debug.Log($"failed attempt to target box at index {targetBoxIndex}, " +
-        //               $"from coords x:{targetX} y:{targetY}");
-        //     return;
-        // }
-
-        bool targetOccupied = false;
-
-        // Debug.Log($"Rounded hit: ({gridX}, {gridY})");
-        // Debug.Log($"Player grid: ({playerGridX}, {playerGridY})");
-        // Debug.Log($"X offset: {math.abs(gridX - playerGridX)}");
-        // Debug.Log($"Y offset: {math.abs(gridY - playerGridY)}");
-        // Debug.Log("");
 
         if (math.abs(mouseGridX - playerGridX) > 1 || math.abs(mouseGridY - playerGridY) > 1)
         {
@@ -168,7 +146,6 @@ public partial struct PlayerDirectionJob : IJobEntity
         {
             targetX = playerGridX;
             targetY = playerGridY;
-            targetOccupied = true; // only used for debugging
         }
 
         player.isTargetOccupied = targetBox.occupied; // TODO: clean up redundant references
@@ -182,10 +159,6 @@ public partial struct PlayerDirectionJob : IJobEntity
 
         if (parabola.t >= 1.0f) // this check can be removed(?), see start of method-body
         {
-            //// Commented due to a lot of console answers while debugging
-            // Debug.Log($"new bounce from {player.currentX}|{player.currentY} to {hitPos.x}|{hitPos.z}" +
-            //           $" - rounded to: {mouseGridX}|{mouseGridY} - target occupied = {targetOccupied}");
-
             // access start height:
             NonUniformScale currentBoxScale = nonuniforms[boxes[currentBoxIndex].entity];
             float startY = currentBoxScale.Value.y;

@@ -39,7 +39,7 @@ public partial class TankAiming : SystemBase
 [WithAll(typeof(Tank))]
 public partial struct TankAimJob : IJobEntity
 {
-    public Translation playerPos;
+    [ReadOnly] public Translation playerPos;
 
     public void Execute(in Translation translation, ref Rotation rotation)
     {

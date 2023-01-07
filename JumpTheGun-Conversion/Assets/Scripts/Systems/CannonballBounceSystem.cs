@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using Unity.Burst;
+using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
@@ -38,7 +39,7 @@ public partial class CannonballBounceSystem : SystemBase
 [BurstCompile]
 public partial struct CannonballBounceJob : IJobEntity
 {
-    public float dt;
+    [ReadOnly] public float dt;
     
     public void Execute(in CannonballData cannonball, ref ParabolaComp parabola, ref Translation translation)
     {

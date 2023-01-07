@@ -177,7 +177,7 @@ MonoBehaviour:
   height: 10
   width: 10
   raycastDistance: 20
-  boxHeightDamage: 0
+  boxHeightDamage: 0.4
   gameOver: 0
 --- !u!114 &22744348
 MonoBehaviour:

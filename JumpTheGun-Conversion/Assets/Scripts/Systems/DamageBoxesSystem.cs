@@ -11,13 +11,11 @@ using UnityEngine;
 public partial class DamageBoxesSystem : SystemBase
 {
     private BeginSimulationEntityCommandBufferSystem ecbSystem;
-    private BuildPhysicsWorld buildPhysicsWorld;
     private StepPhysicsWorld stepPhysicsWorld;
 
     protected override void OnCreate()
     {
         ecbSystem = World.GetOrCreateSystem<BeginSimulationEntityCommandBufferSystem>();
-        buildPhysicsWorld = World.GetOrCreateSystem<BuildPhysicsWorld>();
         stepPhysicsWorld = World.GetOrCreateSystem<StepPhysicsWorld>();
     }
 
@@ -26,17 +24,9 @@ public partial class DamageBoxesSystem : SystemBase
         var ecb = ecbSystem.CreateCommandBuffer();
         var gameData = GetSingleton<GameData>();
 
-        var job = new AdjustHeightAfterDMGJob
-        {
-            ecb = ecb,
-            minHeight = gameData.minHeight,
-        };
-        var handle = job.Schedule();
-        ecbSystem.AddJobHandleForProducer(handle);
-
         var dmgColl = new DamageCollisionJob
         {
-            dealDamageGroup = GetComponentDataFromEntity<DealDamage>(true),
+            fixedDMG = gameData.boxHeightDamage,
             allAffectedTag = GetComponentDataFromEntity<TriggerAffectedTag>(true),
             damageable = GetComponentDataFromEntity<DamageableTag>(true),
             currentHp = GetComponentDataFromEntity<Health>(true),
@@ -45,17 +35,20 @@ public partial class DamageBoxesSystem : SystemBase
             ecb = ecb
         }.Schedule(stepPhysicsWorld.Simulation, Dependency);
 
-        dmgColl.Complete();
-        // ecb.Playback(EntityManager);
+        var job = new AdjustHeightAfterDMGJob
+        {
+            minHeight = gameData.minHeight,
+        };
+        var handle = job.Schedule(dmgColl);
+        
+        ecbSystem.AddJobHandleForProducer(handle);
+        Dependency = handle;
     }
 }
 
 [BurstCompile]
 public partial struct DamageCollisionJob : ITriggerEventsJob
 {
-    [ReadOnly] public ComponentDataFromEntity<DealDamage> dealDamageGroup;
-
-    // [ReadOnly] public ComponentDataFromEntity<TriggerApplyScaleTag> allApplyScaleTag;
     [ReadOnly] public ComponentDataFromEntity<TriggerAffectedTag> allAffectedTag;
     [ReadOnly] public ComponentDataFromEntity<DamageableTag> damageable;
     [ReadOnly] public ComponentDataFromEntity<Health> currentHp;
@@ -63,6 +56,7 @@ public partial struct DamageCollisionJob : ITriggerEventsJob
     [ReadOnly] public ComponentDataFromEntity<CannonballData> cannonball;
 
     public EntityCommandBuffer ecb;
+    [ReadOnly] public float fixedDMG;
 
     public void Execute(TriggerEvent triggerEvent)
     {
@@ -92,7 +86,7 @@ public partial struct DamageCollisionJob : ITriggerEventsJob
                 ecb.SetComponent(entityA, new Health
                 {
                     //taking dmg from the same object (damaging obj)
-                    Value = currentHp[entityA].Value - dealDamageGroup[entityB].Value
+                    Value = currentHp[entityA].Value - fixedDMG
                 });
                 ecb.DestroyEntity(entityB);
             }
@@ -106,7 +100,7 @@ public partial struct DamageCollisionJob : ITriggerEventsJob
                 ecb.SetComponent(entityB, new Health
                 {
                     //taking dmg from the same object (damaging obj)
-                    Value = currentHp[entityB].Value - dealDamageGroup[entityA].Value
+                    Value = currentHp[entityB].Value - fixedDMG
                 });
                 ecb.DestroyEntity(entityA);
             }
@@ -117,9 +111,8 @@ public partial struct DamageCollisionJob : ITriggerEventsJob
 [BurstCompile]
 public partial struct AdjustHeightAfterDMGJob : IJobEntity
 {
-    public EntityCommandBuffer ecb;
-    private float height;
-    public float minHeight;
+    [ReadOnly] private float height;
+    [ReadOnly] public float minHeight;
 
     private void Execute(ref Health health, ref Translation translation, ref NonUniformScale scale)
     {
@@ -131,6 +124,5 @@ public partial struct AdjustHeightAfterDMGJob : IJobEntity
         
         scale.Value.y = health.Value;
         translation.Value.y = health.Value / 2f;
-
     }
 }

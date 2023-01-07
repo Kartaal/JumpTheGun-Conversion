@@ -5,6 +5,7 @@ using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Scenes;
 using Unity.Transforms;
+using UnityEditor.Rendering;
 using Random = Unity.Mathematics.Random;
 
 public partial class SpawnTerrainSystem : SystemBase
@@ -46,21 +47,23 @@ public partial struct SpawnBoxJob : IJobEntity
 {
     public EntityCommandBuffer ecb;
 
-    private float height;
+    [ReadOnly] private float height;
 
     // Required because Random.Range doesn't work outside main thread
     private Random random;
-    public float randomSeed;
+    [ReadOnly] public float randomSeed;
 
     private void Execute(in BoxPrefabComp prefab, in PlayerPrefab playerPrefab, in TankPrefab tankPrefab, ref GameData gameData)
     {
         random = new Random((uint)randomSeed);
 
-        NativeArray<float> heights = new NativeArray<float>(100, Allocator.Temp);
-        NativeArray<int> occupiedIndices = new NativeArray<int>(6, Allocator.Temp);
-
         float col = gameData.width;
         float row = gameData.height;
+        int gridCount = (int) math.floor(col * row);
+        int tankCount = (int) math.floor(col / 2f);
+
+        NativeArray<float> heights = new NativeArray<float>(gridCount, Allocator.Temp);
+        NativeArray<int> occupiedIndices = new NativeArray<int>(tankCount+1, Allocator.Temp); // +1 for player
 
 
         Entity playerEntity = ecb.Instantiate(playerPrefab.entity);
@@ -82,8 +85,7 @@ public partial struct SpawnBoxJob : IJobEntity
 
                 // height scaling
                 height = random.NextFloat(gameData.minHeight, gameData.maxHeight);
-                ////to prove dmg works, can check with same height
-                //height = 5;
+                
                 ecb.AddComponent(boxEntity, new NonUniformScale
                 {
                     Value = new float3(1, height, 1)
@@ -108,7 +110,6 @@ public partial struct SpawnBoxJob : IJobEntity
         int playerX = random.NextInt(0, (int)col);
         int playerY = random.NextInt(0, (int)row);
         float playerHeight = heights[(int)col * playerX + playerY] + 0.3f;
-        // buffer.ElementAt((int)col * playerX + playerY).occupied = true;
         occupiedIndices[0] = (int)col * playerX + playerY;
 
         ecb.SetComponent(playerEntity, new Translation
@@ -126,12 +127,11 @@ public partial struct SpawnBoxJob : IJobEntity
         int tankY = -1;
         var tankIndex = -1;
         // Spawn tanks
-        for (int count = 0; count < 5; count++)
+        for (int count = 0; count < tankCount; count++)
         {
             Entity tankEntity = ecb.Instantiate(tankPrefab.entity);
 
-
-            // Shitty code looking for unoccupied position 
+            // Bad code looking for unoccupied position 
             bool openPosition = true;
             while (true)
             {

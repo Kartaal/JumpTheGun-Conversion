@@ -32,7 +32,6 @@ public partial class PlayerBounceSystem : SystemBase
  * Reads data from player's parabola-component and updates player translation
  */
 [BurstCompile]
-//[WithAll(typeof(Player))]
 public partial struct PlayerBounceJob : IJobEntity
 {
     public void Execute(in Player player, in ParabolaComp parabola, ref Translation translation)

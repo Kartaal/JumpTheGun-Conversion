@@ -73,15 +73,14 @@ public partial class RestartSceneScript : SystemBase
 }
 
 
-//[BurstCompile]
+[BurstCompile]
 public partial struct RestartSceneJob : IJobEntity
 {
-    public EntityCommandBuffer ecb;
-
-    // [BurstDiscard]
     private void Execute(Entity entity, in Player player, ref GameData gameData)
     {
         if (player.isDead)
-            gameData.gameOver = true;
+        {
+            // gameData.gameOver = true;
+        }
     }
 }

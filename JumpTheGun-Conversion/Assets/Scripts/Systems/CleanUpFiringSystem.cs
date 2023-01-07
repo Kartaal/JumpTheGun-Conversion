@@ -1,4 +1,5 @@
 ﻿using Unity.Burst;
+using Unity.Collections;
 using Unity.Entities;
 
 
@@ -31,7 +32,7 @@ public partial class CleanUpFiringSystem : SystemBase
 public partial struct CannonCleanUpJob : IJobEntity
 {
     public EntityCommandBuffer ecb;
-    public float dt;
+    [ReadOnly] public float dt;
 
     private void Execute(ref CannonballData spawner)
     {

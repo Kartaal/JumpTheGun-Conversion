@@ -2,6 +2,7 @@
 using Unity.Collections;
 using Unity.Entities;
 
+[DisableAutoCreation]
 [UpdateAfter(typeof(DamageBoxesSystem))]
 public partial class DestroyOnContactSystem : SystemBase
 {
@@ -31,7 +32,7 @@ public partial class DestroyOnContactSystem : SystemBase
 }
 
 
-//[BurstCompile]
+[BurstCompile]
 public partial struct DestroyPlayerOnLowHealthJob : IJobEntity
 {
     public EntityCommandBuffer ecb;

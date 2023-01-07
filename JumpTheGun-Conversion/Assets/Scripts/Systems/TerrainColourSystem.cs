@@ -1,4 +1,5 @@
 using Unity.Burst;
+using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Rendering;
@@ -34,8 +35,8 @@ public partial class TerrainColourSystem : SystemBase
 [BurstCompile]
 public partial struct ColorLerpJob : IJobEntity
 {
-    public float minHeight;
-    public float maxHeight;
+    [ReadOnly] public float minHeight;
+    [ReadOnly] public float maxHeight;
 
     public void Execute(ref URPMaterialPropertyBaseColor baseColor, in HeightColors heightColors, in NonUniformScale scale)
     {
