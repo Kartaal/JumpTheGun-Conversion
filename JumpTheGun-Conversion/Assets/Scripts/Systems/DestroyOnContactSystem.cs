@@ -29,7 +29,7 @@ public partial class DestroyOnContactSystem : SystemBase
 }
 
 
-[BurstCompile]
+//[BurstCompile]
 public partial struct DestroyPlayerOnLowHealthJob : IJobEntity
 {
     public EntityCommandBuffer ecb;

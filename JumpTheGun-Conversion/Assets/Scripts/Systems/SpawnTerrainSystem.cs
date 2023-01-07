@@ -3,11 +3,16 @@ using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
+using Unity.Scenes;
 using Unity.Transforms;
 using Random = Unity.Mathematics.Random;
 
 public partial class SpawnTerrainSystem : SystemBase
 {
+    
+    private SceneSystem m_SceneSystem;
+    private EntityQuery m_NewRequests;
+    
     public EndInitializationEntityCommandBufferSystem ecbSystem;
     private bool hasRun = false;
 
@@ -38,7 +43,7 @@ public partial class SpawnTerrainSystem : SystemBase
     }
 }
 
-[BurstCompile]
+//[BurstCompile]
 // [WithAll(typeof(NewBoolComponent))] add this
 public partial struct SpawnBoxJob : IJobEntity
 {
