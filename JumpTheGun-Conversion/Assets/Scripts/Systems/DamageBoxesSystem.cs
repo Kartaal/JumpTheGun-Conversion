@@ -137,7 +137,7 @@ public partial struct AdjustHeightAfterDMGJob : IJobEntity
 
         ecb.AddComponent(entity, new NonUniformScale
         {
-            Value = new float3(1, health.Value, 1)
+            Value = new float3(1, health.Value / 2f, 1)
         });
     }
 }
