@@ -160,6 +160,11 @@ public partial struct SpawnBoxJob : IJobEntity
             {
                 Value = new float3(tankX, tankHeightPos, tankY)
             });
+            
+            ecb.SetComponent(tankEntity, new Tank
+            {
+                secondsToNextSpawn = random.NextFloat(3f, 6f)
+            });
         }
 
         // Remember to clean up after yourself

@@ -71,9 +71,9 @@ public partial struct CannonballSpawnJob : IJobEntity
             spawnPoint.secondsBetweenSpawns = 0;
             //spawnPoint.secondsToNextSpawn = UnityEngine.Random.Range(spawnPoint.secondsToNextSpawn-1f
             //    , spawnPoint.secondsToNextSpawn+1f);
-            random = new Random((uint)spawnPoint.entity.Index);
-            var r = random.NextFloat(3f, 6f);
-            spawnPoint.secondsToNextSpawn = r;
+            //random = new Random((uint)spawnPoint.entity.Index);
+            //var r = random.NextFloat(3f, 6f);
+            //spawnPoint.secondsToNextSpawn = r;
 
             ecb.SetComponent(cannonball, new Translation
             {
