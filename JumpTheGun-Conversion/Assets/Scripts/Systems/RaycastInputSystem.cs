@@ -1,3 +1,4 @@
+using Unity.Burst;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Physics;
@@ -86,7 +87,7 @@ public partial class RaycastInputSystem : SystemBase
     }
 }
 
-//[BurstCompile]
+[BurstCompile]
 public partial struct PlayerDirectionJob : IJobEntity
 {
     public float3 hitPos;

@@ -5,6 +5,7 @@ using Unity.Rendering;
 using Unity.Transforms;
 
 //[UpdateAfter(typeof(TerrainDamage))] // Ensure colour is updated according to new height!
+[UpdateAfter(typeof(DamageBoxesSystem))]
 public partial class TerrainColourSystem : SystemBase
 {
     public BeginSimulationEntityCommandBufferSystem ecbSystem;

@@ -7,6 +7,7 @@ using Unity.Physics.Systems;
 using Unity.Transforms;
 using UnityEngine;
 
+[UpdateAfter(typeof(CannonballBounceSystem))]
 public partial class DamageBoxesSystem : SystemBase
 {
     private BeginSimulationEntityCommandBufferSystem ecbSystem;
@@ -120,24 +121,16 @@ public partial struct AdjustHeightAfterDMGJob : IJobEntity
     private float height;
     public float minHeight;
 
-    private void Execute(Entity entity, ref Health health)
+    private void Execute(ref Health health, ref Translation translation, ref NonUniformScale scale)
     {
         //need to figure out why it's not the default size
         if (health.Value <= minHeight)
         {
             health.Value = minHeight;
-            return;
         }
+        
+        scale.Value.y = health.Value;
+        translation.Value.y = health.Value / 2f;
 
-        // Adding to the DynamicBuffer
-        ecb.SetComponent(entity, new Health
-        {
-            Value = health.Value
-        });
-
-        ecb.AddComponent(entity, new NonUniformScale
-        {
-            Value = new float3(1, health.Value / 2f, 1)
-        });
     }
 }

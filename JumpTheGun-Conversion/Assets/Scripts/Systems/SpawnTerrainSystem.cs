@@ -40,7 +40,7 @@ public partial class SpawnTerrainSystem : SystemBase
     }
 }
 
-//[BurstCompile]
+[BurstCompile]
 // [WithAll(typeof(NewBoolComponent))] add this
 public partial struct SpawnBoxJob : IJobEntity
 {

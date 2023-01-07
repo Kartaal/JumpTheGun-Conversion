@@ -35,6 +35,7 @@ public partial class CannonballBounceSystem : SystemBase
 /**
  * Reads data from cannonball's parabola-component and updates cannonball translation
  */
+[BurstCompile]
 public partial struct CannonballBounceJob : IJobEntity
 {
     public float dt;

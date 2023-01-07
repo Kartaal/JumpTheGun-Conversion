@@ -16,15 +16,17 @@ public partial class DestroyOnContactSystem : SystemBase
     {
         var ecb = ecbSystem.CreateCommandBuffer();
 
+        /*
         var aimJob = new DestroyPlayerOnLowHealthJob
         {
             ecb = ecb,
             //player = GetComponentDataFromEntity<Player>(true),
         };
+        */
 
-        var jobHandle = aimJob.Schedule();
+        //var jobHandle = aimJob.Schedule();
 
-        ecbSystem.AddJobHandleForProducer(jobHandle);
+        //ecbSystem.AddJobHandleForProducer(jobHandle);
     }
 }
 

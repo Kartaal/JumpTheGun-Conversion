@@ -30,14 +30,16 @@ public partial class RestartSceneScript : SystemBase
         var loadParameters = new SceneSystem.LoadParameters { Flags = SceneLoadFlags.DisableAutoLoad };
         var sceneEntity = m_SceneSystem.LoadSceneAsync(allocatedScenes[0].Guid, loadParameters);
 
-        var ecb = ecbSystem.CreateCommandBuffer();
+        //var ecb = ecbSystem.CreateCommandBuffer();
 
+        /*
         var aimJob = new RestartSceneJob
         {
             ecb = ecb,
             // sceneSystem = m_SceneSystem,
             // requests = allocatedScenes,
         };
+        */
         //var jobHandle = aimJob.Schedule();
         //ecbSystem.AddJobHandleForProducer(jobHandle);
 
