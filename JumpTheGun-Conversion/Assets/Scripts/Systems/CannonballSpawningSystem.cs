@@ -19,10 +19,10 @@ public partial class CannonballSpawningSystem : SystemBase
     protected override void OnUpdate()
     {
         float deltaTime = Time.DeltaTime;
-        
+
         var gameData = GetSingleton<GameData>();
         var nonUniforms = GetComponentDataFromEntity<NonUniformScale>(true);
-        
+
         Entity cannonballPrefab = GetSingleton<CannonballPrefab>().entity;
         var player = GetSingleton<Player>();
 
@@ -33,8 +33,6 @@ public partial class CannonballSpawningSystem : SystemBase
             playerPosX = player.currentX,
             playerPosY = player.currentY,
             dt = deltaTime,
-            col = gameData.width,
-            // row = (int)gameData.height,
             boxes = GetBuffer<BoxesComponent>(gameData.manager),
             nonUniforms = nonUniforms,
         };
@@ -53,8 +51,9 @@ public partial struct CannonballSpawnJob : IJobEntity
     [ReadOnly] public float dt;
     [ReadOnly] public int playerPosX;
     [ReadOnly] public int playerPosY;
-    
+
     public int col;
+
     // public int row;
     [ReadOnly] public ComponentDataFromEntity<NonUniformScale> nonUniforms;
     [ReadOnly] public DynamicBuffer<BoxesComponent> boxes;
@@ -72,7 +71,7 @@ public partial struct CannonballSpawnJob : IJobEntity
             spawnPoint.secondsBetweenSpawns = 0;
             //spawnPoint.secondsToNextSpawn = UnityEngine.Random.Range(spawnPoint.secondsToNextSpawn-1f
             //    , spawnPoint.secondsToNextSpawn+1f);
-            random = new Random((uint) spawnPoint.entity.Index);
+            random = new Random((uint)spawnPoint.entity.Index);
             var r = random.NextFloat(3f, 6f);
             spawnPoint.secondsToNextSpawn = r;
 
@@ -83,7 +82,7 @@ public partial struct CannonballSpawnJob : IJobEntity
 
             int tankGridX = (int)math.round(translation.Value.x);
             int tankGridY = (int)math.round(translation.Value.z);
-            
+
             ecb.SetComponent(cannonball, new CannonballData
             {
                 entity = cannonball,
@@ -94,29 +93,29 @@ public partial struct CannonballSpawnJob : IJobEntity
                 targetX = playerPosX,
                 targetY = playerPosY,
             });
-            
+
             int currentBoxIndex = col * tankGridX + tankGridY; // from
             int targetBoxIndex = col * playerPosX + playerPosY; // to
-            
+
             NonUniformScale currentBoxScale = nonUniforms[boxes[currentBoxIndex].entity];
             float startY = currentBoxScale.Value.y;
-            
+
             NonUniformScale targetBoxScale = nonUniforms[boxes[targetBoxIndex].entity];
             float endY = targetBoxScale.Value.y;
-            
+
             float height = math.max(startY, endY);
             height += 5f;
-            
+
             float c = startY;
-            
+
             float k = math.sqrt(math.abs(startY - height)) /
                       (math.sqrt(math.abs(startY - height)) +
                        math.sqrt(math.abs(endY - height)));
-            
+
             float a = (height - startY - k * (endY - startY)) / (k * k - k);
             float b = endY - startY - a;
             float t = 0f; // reset t to start new parabola movement
-            
+
             ecb.SetComponent(cannonball, new ParabolaComp
             {
                 c = c,
@@ -124,8 +123,6 @@ public partial struct CannonballSpawnJob : IJobEntity
                 b = b,
                 t = t
             });
-            
-            
         }
     }
 }

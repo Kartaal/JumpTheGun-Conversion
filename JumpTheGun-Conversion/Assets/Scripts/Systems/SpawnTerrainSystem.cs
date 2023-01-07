@@ -60,7 +60,7 @@ public partial struct SpawnBoxJob : IJobEntity
         float col = gameData.width;
         float row = gameData.height;
         int gridCount = (int) math.floor(col * row);
-        int tankCount = (int) math.floor(col / 2f);
+        int tankCount = gameData.tankCount;
 
         NativeArray<float> heights = new NativeArray<float>(gridCount, Allocator.Temp);
         NativeArray<int> occupiedIndices = new NativeArray<int>(tankCount+1, Allocator.Temp); // +1 for player
@@ -70,9 +70,9 @@ public partial struct SpawnBoxJob : IJobEntity
 
         var buffer = ecb.AddBuffer<BoxesComponent>(gameData.manager);
 
-        for (int i = 0; i < col; i++)
+        for (int i = 0; i < row; i++)
         {
-            for (int j = 0; j < row; j++)
+            for (int j = 0; j < col; j++)
             {
                 Entity boxEntity = ecb.Instantiate(prefab.Value);
 
@@ -136,8 +136,8 @@ public partial struct SpawnBoxJob : IJobEntity
             while (true)
             {
                 openPosition = true;
-                tankX = random.NextInt(0, (int)col);
-                tankY = random.NextInt(0, (int)row);
+                tankX = random.NextInt(0, (int)row);
+                tankY = random.NextInt(0, (int)col);
                 tankIndex = (int)col * tankX + tankY;
 
                 for (int index = 0; index < occupiedIndices.Length; index++)

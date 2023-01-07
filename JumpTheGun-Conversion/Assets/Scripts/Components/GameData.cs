@@ -14,5 +14,7 @@ public struct GameData : IComponentData
     public int width;
 
     public float boxHeightDamage;
+
+    public int tankCount;
     // public bool gameOver;
 }

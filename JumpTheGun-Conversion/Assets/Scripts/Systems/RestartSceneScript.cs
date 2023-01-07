@@ -31,19 +31,8 @@ public partial class RestartSceneScript : SystemBase
         var sceneEntity = m_SceneSystem.LoadSceneAsync(allocatedScenes[0].Guid, loadParameters);
 
         //var ecb = ecbSystem.CreateCommandBuffer();
-
-        /*
-        var aimJob = new RestartSceneJob
-        {
-            ecb = ecb,
-            // sceneSystem = m_SceneSystem,
-            // requests = allocatedScenes,
-        };
-        */
-        //var jobHandle = aimJob.Schedule();
-        //ecbSystem.AddJobHandleForProducer(jobHandle);
-
         //var gameData = GetSingleton<GameData>();
+        
         var playerEntity = GetSingleton<Player>();
         if (playerEntity.isDead)
         {
@@ -72,15 +61,3 @@ public partial class RestartSceneScript : SystemBase
     }
 }
 
-
-[BurstCompile]
-public partial struct RestartSceneJob : IJobEntity
-{
-    private void Execute(Entity entity, in Player player, ref GameData gameData)
-    {
-        if (player.isDead)
-        {
-            // gameData.gameOver = true;
-        }
-    }
-}
