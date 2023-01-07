@@ -10,9 +10,6 @@ using Random = Unity.Mathematics.Random;
 public partial class SpawnTerrainSystem : SystemBase
 {
     
-    private SceneSystem m_SceneSystem;
-    private EntityQuery m_NewRequests;
-    
     public EndInitializationEntityCommandBufferSystem ecbSystem;
     private bool hasRun = false;
 
