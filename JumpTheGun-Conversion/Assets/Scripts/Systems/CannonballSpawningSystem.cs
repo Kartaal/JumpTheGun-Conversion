@@ -4,6 +4,8 @@ using Unity.Entities;
 using Unity.Jobs;
 using Unity.Mathematics;
 using Unity.Transforms;
+using UnityEngine;
+using Random = Unity.Mathematics.Random;
 
 [UpdateAfter(typeof(TankAiming))]
 public partial class CannonballSpawningSystem : SystemBase
@@ -83,11 +85,16 @@ public partial struct CannonballSpawnJob : IJobEntity
             int tankGridX = (int)math.round(translation.Value.x);
             int tankGridY = (int)math.round(translation.Value.z);
 
+            float distance = (new Vector2(playerPosY - tankGridY, playerPosX - tankGridX)).magnitude;
+            float duration = distance / 2.5f; // hardcoded 2.5f speed, copy from original project
+            if (duration < .0001f) duration = 1f;
+
             ecb.SetComponent(cannonball, new CannonballData
             {
                 entity = cannonball,
-                timeLeft = 5,
+                timeLeft = duration + 2f, // remove this?
                 speed = 5,
+                duration = duration, // new cannonball behavior uses duration for simulated time
                 startX = tankGridX,
                 startY = tankGridY,
                 targetX = playerPosX,
@@ -104,7 +111,7 @@ public partial struct CannonballSpawnJob : IJobEntity
             float endY = targetBoxScale.Value.y;
 
             float height = math.max(startY, endY);
-            height += 5f;
+            height += 5f; // FIXME: hardcoded parabola height offset - behaves weird on short distances
 
             float c = startY;
 

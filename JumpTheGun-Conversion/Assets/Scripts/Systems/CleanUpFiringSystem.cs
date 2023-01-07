@@ -3,7 +3,7 @@ using Unity.Collections;
 using Unity.Entities;
 
 
-[UpdateAfter(typeof(CannonballSpawningSystem))]
+[UpdateAfter(typeof(CannonballBounceSystem))]
 public partial class CleanUpFiringSystem : SystemBase
 {
     private BeginSimulationEntityCommandBufferSystem ecbSystem;
@@ -15,6 +15,7 @@ public partial class CleanUpFiringSystem : SystemBase
 
     protected override void OnUpdate()
     {
+        /*
         float deltaTime = Time.DeltaTime;
         var cannonballSpawnJob = new CannonCleanUpJob
         {
@@ -24,6 +25,7 @@ public partial class CleanUpFiringSystem : SystemBase
 
         var handle = cannonballSpawnJob.Schedule();
         ecbSystem.AddJobHandleForProducer(handle);
+        */
     }
 }
 

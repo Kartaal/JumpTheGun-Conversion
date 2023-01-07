@@ -43,14 +43,21 @@ public partial struct CannonballBounceJob : IJobEntity
     
     public void Execute(in CannonballData cannonball, ref ParabolaComp parabola, ref Translation translation)
     {
-        parabola.t += (dt * 0.7f); // FIXME: Hack to reduce cannonball speed
+        //parabola.t += (dt * 0.7f); // FIXME: Hack to reduce cannonball speed
+        parabola.t += dt;
+        float simT = parabola.t / cannonball.duration;
         
-        if (parabola.t <= 1f)
+        //if (parabola.t <= 1f)
+        if (simT <= cannonball.duration)
         {
-            float y = parabola.a * parabola.t * parabola.t + parabola.b * parabola.t + parabola.c;
+            
+            float y = parabola.a * simT * simT + parabola.b * simT + parabola.c;
 
-            float x = math.lerp(cannonball.startX, cannonball.targetX, parabola.t);
-            float z = math.lerp(cannonball.startY, cannonball.targetY, parabola.t);
+            //float x = math.lerp(cannonball.startX, cannonball.targetX, simT);
+            float x = Mathf.LerpUnclamped(cannonball.startX, cannonball.targetX, simT);
+
+            //float z = math.lerp(cannonball.startY, cannonball.targetY, simT);
+            float z = Mathf.LerpUnclamped(cannonball.startY, cannonball.targetY, simT);
 
             translation.Value = new float3(x, y, z);
         }
