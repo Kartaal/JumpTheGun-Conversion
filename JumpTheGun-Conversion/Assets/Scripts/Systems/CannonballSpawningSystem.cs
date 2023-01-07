@@ -5,7 +5,7 @@ using Unity.Jobs;
 using Unity.Mathematics;
 using Unity.Transforms;
 
-[UpdateAfter(typeof(SpawnTerrainSystem))]
+[UpdateAfter(typeof(TankAiming))]
 public partial class CannonballSpawningSystem : SystemBase
 {
     public BeginSimulationEntityCommandBufferSystem ecbSystem;
@@ -72,8 +72,8 @@ public partial struct CannonballSpawnJob : IJobEntity
             spawnPoint.secondsBetweenSpawns = 0;
             //spawnPoint.secondsToNextSpawn = UnityEngine.Random.Range(spawnPoint.secondsToNextSpawn-1f
             //    , spawnPoint.secondsToNextSpawn+1f);
-            random = new Random(1232154);
-            var r = random.NextFloat(spawnPoint.secondsToNextSpawn - 1f, spawnPoint.secondsToNextSpawn + 1f);
+            random = new Random((uint)spawnPoint.entity.Index);
+            var r = random.NextFloat(3f, 6f);
             spawnPoint.secondsToNextSpawn = r;
 
             ecb.SetComponent(cannonball, new Translation

@@ -7,7 +7,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using Random = UnityEngine.Random;
 
-[UpdateAfter(typeof(DestroyOnContact))]
+[UpdateAfter(typeof(DestroyOnContactSystem))]
 public partial class RestartSceneScript : SystemBase
 {
     private BeginSimulationEntityCommandBufferSystem ecbSystem;
