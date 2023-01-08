@@ -174,10 +174,10 @@ MonoBehaviour:
   manager: {fileID: 22744345}
   minHeight: 2.5
   maxHeight: 5
-  height: 100
-  width: 100
+  height: 50
+  width: 50
   boxHeightDamage: 0.4
-  tankCount: 50
+  tankCount: 15
 --- !u!114 &22744348
 MonoBehaviour:
   m_ObjectHideFlags: 0
