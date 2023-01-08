@@ -177,7 +177,7 @@ MonoBehaviour:
   height: 10
   width: 10
   boxHeightDamage: 0.4
-  tankCount: 5
+  tankCount: 30
 --- !u!114 &22744348
 MonoBehaviour:
   m_ObjectHideFlags: 0
