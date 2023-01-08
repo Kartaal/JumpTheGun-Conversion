@@ -12,7 +12,7 @@ using Random = UnityEngine.Random;
  * It was supposed to restart the game when game over, but this
  *  version only unloads the entities subscene.
  */
-[UpdateAfter(typeof(DamageBoxesSystem))]
+[UpdateAfter(typeof(DamageCollisionSystem))]
 public partial class RestartSceneScript : SystemBase
 {
     private BeginSimulationEntityCommandBufferSystem ecbSystem;

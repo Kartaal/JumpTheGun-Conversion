@@ -8,7 +8,7 @@ using Unity.Transforms;
 using UnityEngine;
 
 [UpdateAfter(typeof(CannonballBounceSystem))]
-public partial class DamageBoxesSystem : SystemBase
+public partial class DamageCollisionSystem : SystemBase
 {
     private BeginSimulationEntityCommandBufferSystem ecbSystem;
     private StepPhysicsWorld stepPhysicsWorld;
