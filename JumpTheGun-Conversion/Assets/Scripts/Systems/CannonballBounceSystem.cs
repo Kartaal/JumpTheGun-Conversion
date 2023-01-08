@@ -30,6 +30,8 @@ public partial class CannonballBounceSystem : SystemBase
 
         var handle = cannonballBounceJob.Schedule();
         ecbSystem.AddJobHandleForProducer(handle);
+        handle.Complete();
+
     }
 }
 

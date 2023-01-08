@@ -39,6 +39,8 @@ public partial class CannonballSpawningSystem : SystemBase
 
         var handle = cannonballSpawnJob.Schedule();
         ecbSystem.AddJobHandleForProducer(handle);
+        handle.Complete();
+
     }
 }
 

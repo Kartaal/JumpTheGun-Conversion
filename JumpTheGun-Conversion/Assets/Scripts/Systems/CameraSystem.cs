@@ -20,6 +20,8 @@ public partial class CameraSystem : SystemBase
         var updateCamJob = new UpdateCameraJob();
         var handle = updateCamJob.Schedule();
         ecbSystem.AddJobHandleForProducer(handle);
+        handle.Complete();
+
     }
     
 }

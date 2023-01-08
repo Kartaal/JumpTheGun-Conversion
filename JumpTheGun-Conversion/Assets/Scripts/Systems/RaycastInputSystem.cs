@@ -83,6 +83,7 @@ public partial class RaycastInputSystem : SystemBase
 
             var handle = playerDirJob.Schedule();
             ecbSystem.AddJobHandleForProducer(handle);
+            handle.Complete();
         }
     }
 }

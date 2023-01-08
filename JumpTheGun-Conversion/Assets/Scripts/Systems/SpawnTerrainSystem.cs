@@ -38,6 +38,8 @@ public partial class SpawnTerrainSystem : SystemBase
 
         var handle = job.Schedule();
         ecbSystem.AddJobHandleForProducer(handle);
+        handle.Complete();
+
     }
 }
 

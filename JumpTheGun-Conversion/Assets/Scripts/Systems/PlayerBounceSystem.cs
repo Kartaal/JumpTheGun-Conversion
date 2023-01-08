@@ -25,6 +25,7 @@ public partial class PlayerBounceSystem : SystemBase
         };
         var handle = playerBounceJob.Schedule();
         ecbSystem.AddJobHandleForProducer(handle);
+        handle.Complete();
     }
 }
 
