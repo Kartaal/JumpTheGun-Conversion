@@ -117,17 +117,17 @@ public partial struct DamageCollisionJob : ITriggerEventsJob
         //     
         // }
         // else if (damageable.HasComponent(entityB) && allAffectedTag.HasComponent(entityA))
-        {
-            if (currentHp.HasComponent(entityB))
-            {
-                ecb.SetComponent(entityB, new Health
-                {
-                    //taking dmg from the same object (damaging obj)
-                    Value = currentHp[entityB].Value - fixedDMG
-                });
-                ecb.DestroyEntity(entityA);
-            }
-        }
+        // {
+        //     if (currentHp.HasComponent(entityB))
+        //     {
+        //         ecb.SetComponent(entityB, new Health
+        //         {
+        //             //taking dmg from the same object (damaging obj)
+        //             Value = currentHp[entityB].Value - fixedDMG
+        //         });
+        //         ecb.DestroyEntity(entityA);
+        //     }
+        // }
     }
 }
 
