@@ -140,7 +140,7 @@ public partial struct PlayerDirectionJob : IJobEntity
         // t > 1 means bounce is complete (IDLE)
         // 0 < t < 1 means bounce is ongoing (BOUNCING)
 
-        if (parabola.t >= 1.0f) // this check can be removed(?), see start of method-body
+        if (parabola.t >= 1.0f) // this check has been made redundant?, see start of method-body
         {
             // access start height:
             NonUniformScale currentBoxScale = nonuniforms[boxes[currentBoxIndex].entity];
