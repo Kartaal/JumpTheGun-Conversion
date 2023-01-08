@@ -27,10 +27,9 @@ public partial class DamageBoxesSystem : SystemBase
         var dmgColl = new DamageCollisionJob
         {
             fixedDMG = gameData.boxHeightDamage,
-            allAffectedTag = GetComponentDataFromEntity<TriggerAffectedTag>(true),
-            damageable = GetComponentDataFromEntity<DamageableTag>(true),
             currentHp = GetComponentDataFromEntity<Health>(true),
             player = GetComponentDataFromEntity<Player>(true),
+            boxComp = GetComponentDataFromEntity<DamageableTag>(true),
             cannonball = GetComponentDataFromEntity<CannonballData>(true),
             ecb = ecb
         }.Schedule(stepPhysicsWorld.Simulation, Dependency);
@@ -43,15 +42,15 @@ public partial class DamageBoxesSystem : SystemBase
         
         ecbSystem.AddJobHandleForProducer(handle);
         Dependency = handle;
+        handle.Complete();
     }
 }
 
 [BurstCompile]
 public partial struct DamageCollisionJob : ITriggerEventsJob
 {
-    [ReadOnly] public ComponentDataFromEntity<TriggerAffectedTag> allAffectedTag;
-    [ReadOnly] public ComponentDataFromEntity<DamageableTag> damageable;
     [ReadOnly] public ComponentDataFromEntity<Health> currentHp;
+    [ReadOnly] public ComponentDataFromEntity<DamageableTag> boxComp;
     [ReadOnly] public ComponentDataFromEntity<Player> player;
     [ReadOnly] public ComponentDataFromEntity<CannonballData> cannonball;
 
@@ -65,7 +64,6 @@ public partial struct DamageCollisionJob : ITriggerEventsJob
 
         if (player.HasComponent(entityA) && cannonball.HasComponent(entityB))
         {
-            //ecb.SetComponent(entityA, player);
             var playerData = player[entityA];
             playerData.isDead = true;
             ecb.SetComponent(entityA, playerData);
@@ -79,32 +77,25 @@ public partial struct DamageCollisionJob : ITriggerEventsJob
             //Debug.Log("PLAYER SUCCESSFULLY KILLED AS entityB");
         }
         
-        if (damageable.HasComponent(entityA) && allAffectedTag.HasComponent(entityB))
+        if (boxComp.HasComponent(entityA) && cannonball.HasComponent(entityB))
         {
-            if (currentHp.HasComponent(entityA))
+            ecb.SetComponent(entityA, new Health
             {
-                ecb.SetComponent(entityA, new Health
-                {
-                    //taking dmg from the same object (damaging obj)
-                    Value = currentHp[entityA].Value - fixedDMG
-                });
-                ecb.DestroyEntity(entityB);
-            }
-            
-            
-        }
-        else if (damageable.HasComponent(entityB) && allAffectedTag.HasComponent(entityA))
+                //taking dmg from the same object (damaging obj)
+                Value = currentHp[entityA].Value - fixedDMG
+            });
+            ecb.DestroyEntity(entityB);
+        } 
+        else if (boxComp.HasComponent(entityB) && cannonball.HasComponent(entityA))
         {
-            if (currentHp.HasComponent(entityB))
+            ecb.SetComponent(entityB, new Health
             {
-                ecb.SetComponent(entityB, new Health
-                {
-                    //taking dmg from the same object (damaging obj)
-                    Value = currentHp[entityB].Value - fixedDMG
-                });
-                ecb.DestroyEntity(entityA);
-            }
+                //taking dmg from the same object (damaging obj)
+                Value = currentHp[entityB].Value - fixedDMG
+            });
+            ecb.DestroyEntity(entityA);
         }
+        
     }
 }
 
@@ -116,7 +107,7 @@ public partial struct AdjustHeightAfterDMGJob : IJobEntity
 
     private void Execute(ref Health health, ref Translation translation, ref NonUniformScale scale)
     {
-        //need to figure out why it's not the default size
+        
         if (health.Value <= minHeight)
         {
             health.Value = minHeight;

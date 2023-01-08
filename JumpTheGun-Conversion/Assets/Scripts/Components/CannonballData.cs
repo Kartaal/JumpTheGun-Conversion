@@ -4,8 +4,6 @@ using Unity.Entities;
 public struct CannonballData : IComponentData
 {
     public Entity entity;
-    public float timeLeft;
-    public float speed;
 
     public float duration;
     

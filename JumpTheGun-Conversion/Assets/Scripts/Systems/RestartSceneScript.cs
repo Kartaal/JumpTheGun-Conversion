@@ -7,7 +7,12 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using Random = UnityEngine.Random;
 
-[UpdateAfter(typeof(DestroyOnContactSystem))]
+/**
+ * This system was not successfully implemented.
+ * It was supposed to restart the game when game over, but this
+ *  version only unloads the entities subscene.
+ */
+[UpdateAfter(typeof(DamageBoxesSystem))]
 public partial class RestartSceneScript : SystemBase
 {
     private BeginSimulationEntityCommandBufferSystem ecbSystem;
@@ -29,35 +34,16 @@ public partial class RestartSceneScript : SystemBase
 
         var loadParameters = new SceneSystem.LoadParameters { Flags = SceneLoadFlags.DisableAutoLoad };
         var sceneEntity = m_SceneSystem.LoadSceneAsync(allocatedScenes[0].Guid, loadParameters);
-
-        //var ecb = ecbSystem.CreateCommandBuffer();
-        //var gameData = GetSingleton<GameData>();
         
         var playerEntity = GetSingleton<Player>();
         if (playerEntity.isDead)
         {
-            Debug.Log("GAME OVER WILL RESTART");
-            
-            //var entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
-            //entityManager.DestroyEntity(entityManager.UniversalQuery);
+            Debug.Log("GAME OVER");
             
             m_SceneSystem.UnloadScene(sceneEntity);
             
-            //SceneManager.LoadScene(SceneManager.GetActiveScene().name, LoadSceneMode.Single);
-            //SceneManager.LoadScene(2);
         }
 
-        /*
-        if (gameData.gameOver)
-        {
-            Debug.Log("EndMe");
-            m_SceneSystem.UnloadScene(sceneEntity);
-            //// reloadscene
-            // EntityManager.DestroyEntity(m_NewRequests);
-            // m_NewRequests.Dispose();
-            // m_SceneSystem.UnloadScene(sceneEntity);
-        }
-        */
     }
 }
 
