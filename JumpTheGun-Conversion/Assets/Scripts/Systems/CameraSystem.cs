@@ -1,8 +1,5 @@
-using System.Collections;
-using System.Collections.Generic;
 using Unity.Entities;
 using Unity.Transforms;
-using UnityEngine;
 
 public partial class CameraSystem : SystemBase
 {
@@ -21,7 +18,6 @@ public partial class CameraSystem : SystemBase
         var handle = updateCamJob.Schedule();
         ecbSystem.AddJobHandleForProducer(handle);
         handle.Complete();
-
     }
     
 }

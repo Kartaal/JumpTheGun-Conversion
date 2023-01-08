@@ -5,7 +5,7 @@ using Unity.Mathematics;
 using Unity.Rendering;
 using Unity.Transforms;
 
-//[UpdateAfter(typeof(TerrainDamage))] // Ensure colour is updated according to new height!
+// Ensure colour is updated according to new height!
 [UpdateAfter(typeof(DamageBoxesSystem))]
 public partial class TerrainColourSystem : SystemBase
 {
@@ -18,7 +18,6 @@ public partial class TerrainColourSystem : SystemBase
     
     protected override void OnUpdate()
     {
-        var ecb = ecbSystem.CreateCommandBuffer();
         var gameData = GetSingleton<GameData>();
 
         var colorLerpJob = new ColorLerpJob

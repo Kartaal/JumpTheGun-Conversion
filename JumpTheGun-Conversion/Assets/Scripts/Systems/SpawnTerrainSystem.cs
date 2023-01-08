@@ -162,7 +162,7 @@ public partial struct SpawnBoxJob : IJobEntity
             {
                 Value = new float3(tankX, tankHeightPos, tankY)
             });
-            
+            // Randomize each tank's shooting interval
             ecb.SetComponent(tankEntity, new Tank
             {
                 secondsToNextSpawn = random.NextFloat(3f, 6f)
