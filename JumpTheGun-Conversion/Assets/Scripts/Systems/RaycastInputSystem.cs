@@ -15,8 +15,6 @@ public partial class RaycastInputSystem : SystemBase
     public BuildPhysicsWorld _physicsWorld;
     public CollisionWorld _collisionWorld;
 
-    // public GameData _gameData;
-
     protected override void OnCreate()
     {
         ecbSystem = World.GetOrCreateSystem<BeginSimulationEntityCommandBufferSystem>();
@@ -24,21 +22,9 @@ public partial class RaycastInputSystem : SystemBase
         RequireSingletonForUpdate<Player>();
     }
 
-    // protected override void OnStartRunning()
-    // {
-    //     if (_gameData.Equals(null))
-    //     {
-    //         _gameData = GetSingleton<GameData>(); // OBS: this approach is currently not working or active
-    //     }
-    // }
-
     protected override void OnUpdate()
     {
         float dt = Time.DeltaTime;
-
-        // Debugging things...
-        // if (Input.GetKey(KeyCode.A))
-        //     Debug.Break();
 
         RaycastInput raycastInput = new RaycastInput();
         RaycastHit raycastHit;
@@ -77,12 +63,12 @@ public partial class RaycastInputSystem : SystemBase
                 row = (int)gameData.height,
                 boxes = GetBuffer<BoxesComponent>(gameData.manager, true),
                 nonuniforms = nonuniforms,
-                // frames = UnityEngine.Time.frameCount,
                 dt = dt
             };
 
             var handle = playerDirJob.Schedule();
             ecbSystem.AddJobHandleForProducer(handle);
+            handle.Complete();
         }
     }
 }
@@ -94,10 +80,7 @@ public partial struct PlayerDirectionJob : IJobEntity
     [ReadOnly] public int col;
     [ReadOnly] public int row;
     [ReadOnly] public ComponentDataFromEntity<NonUniformScale> nonuniforms;
-
     [ReadOnly] public DynamicBuffer<BoxesComponent> boxes;
-    // public int frames;
-
     [ReadOnly] public float dt;
 
     public void Execute(ref Player player, ref ParabolaComp parabola, in Translation translation)
@@ -157,7 +140,7 @@ public partial struct PlayerDirectionJob : IJobEntity
         // t > 1 means bounce is complete (IDLE)
         // 0 < t < 1 means bounce is ongoing (BOUNCING)
 
-        if (parabola.t >= 1.0f) // this check can be removed(?), see start of method-body
+        if (parabola.t >= 1.0f) // this check has been made redundant?, see start of method-body
         {
             // access start height:
             NonUniformScale currentBoxScale = nonuniforms[boxes[currentBoxIndex].entity];

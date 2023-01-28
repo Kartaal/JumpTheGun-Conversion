@@ -1,10 +1,7 @@
-using System.Collections;
-using System.Collections.Generic;
 using Unity.Burst;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
-using UnityEngine;
 
 [UpdateAfter(typeof(RaycastInputSystem))]
 public partial class PlayerBounceSystem : SystemBase
@@ -19,12 +16,10 @@ public partial class PlayerBounceSystem : SystemBase
 
     protected override void OnUpdate()
     {
-        var playerBounceJob = new PlayerBounceJob
-        {
-            
-        };
+        var playerBounceJob = new PlayerBounceJob();
         var handle = playerBounceJob.Schedule();
         ecbSystem.AddJobHandleForProducer(handle);
+        handle.Complete();
     }
 }
 

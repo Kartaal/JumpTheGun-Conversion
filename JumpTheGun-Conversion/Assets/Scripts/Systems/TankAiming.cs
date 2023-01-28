@@ -31,6 +31,7 @@ public partial class TankAiming : SystemBase
         var jobHandle = aimJob.Schedule();
         
         ecbSystem.AddJobHandleForProducer(jobHandle);
+        jobHandle.Complete();
 
     }
 }
